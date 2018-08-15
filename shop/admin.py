@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import *
 
-# Register your models here.
+admin.site.register(Configuracion)
+admin.site.register(Externo)
+admin.site.register(MyURLS)
