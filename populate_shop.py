@@ -50,6 +50,7 @@ def populate():
         {"variable": "fabricante_limite", "valor": "300", "activo": True},
         {"variable": "categoria_limite",  "valor": "300", "activo": True},
         {"variable": "prod_page",       "valor": "24",  "activo": True},
+        {"variable": "cate_page",       "valor": "24",  "activo": True},
         {"variable": "prod_home",       "valor": "24",  "activo": True},
         {"variable": "run_cron",        "valor": "",    "activo": True},
         {"variable": "beneficio",       "valor": "58",  "activo": True},
@@ -90,15 +91,15 @@ def populate():
     # if you are using Python 2.x then use cats.iteritems() see
     # http://docs.quantifiedcode.com/python-anti-patterns/readability/
     # for more information about how to iterate over a dictionary properly.
-    
+
+    print(' Categorías Antes: {0}'.format(Category.objects.all().count()))
     print(' Configuración Antes: {0}'.format(Configuracion.objects.all().count()))
     print(' Externo Antes: {0}'.format(Externo.objects.all().count()))
-    print(' MyURLS Antes: {0}'.format(MyURLS.objects.all().count()))
-    #print(' Categorías    Antes: {0}'.format(Category.objects.all().count()))
+    print(' MyURLs Antes: {0}'.format(MyURLs.objects.all().count()))
     print("Processing Shop population script...")
     
-    #for cat in shop_categories:
-    #    add_category(cat["name"],cat["parent"])
+    for cat in shop_categories:
+        add_category(cat["name"],cat["parent"])
     for c in shop_configuracions:
         add_configuracion(c["variable"],c["valor"],c["activo"])
     for e in shop_externo:
@@ -119,12 +120,12 @@ def populate():
     #for cat in Category.objects.all():
     #    print("{0} ".format(str(cat)))
 
-    #print(' Categorías    Después: {0}'.format(Category.objects.all().count()))
+    print(' Categorías Después: {0}'.format(Category.objects.all().count()))
     print(' Configuración Después: {0}'.format(Configuracion.objects.all().count()))
     print(' Externo Después: {0}'.format(Externo.objects.all().count()))
-    print(' MyURLS Después: {0}'.format(MyURLS.objects.all().count()))
+    print(' MyURLs Después: {0}'.format(MyURLs.objects.all().count()))
 
-'''
+
 def add_category(name, parent=None):
     obj = Category.objects.get_or_create(name=name, parent=parent)[0]
     obj.slug=slugify(name)
@@ -137,7 +138,7 @@ def add_category(name, parent=None):
         obj.parent=None
     obj.save()
     return obj
-'''
+
 def add_configuracion(variable, valor, activo=True):
     obj = Configuracion.objects.get_or_create(variable=variable)[0]
     obj.valor=valor
@@ -151,7 +152,7 @@ def add_externo(name, url):
     return obj
 
 def add_myurls(name, url, usuario='', password=''):
-    obj = MyURLS.objects.get_or_create(name=name, url=url, usuario=usuario, password=password)[0]
+    obj = MyURLs.objects.get_or_create(name=name, url=url, usuario=usuario, password=password)[0]
     obj.save()
     return obj
 '''

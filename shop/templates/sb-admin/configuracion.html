@@ -50,16 +50,12 @@
                                         <th>Variable</th>
                                         <th>Valor</th>
                                         <th>Activo</th>
-                                        <th>Operaciones</th>
+                                        <th></th>
                                     </tr>
                                 </thead>                                
                                 <tbody>
                                     {% for ficha in lista %}
-                                        {% if ficha.activo %}
-                                            <tr class="success">
-                                        {% else %}
-                                            <tr class="danger">
-                                        {% endif %}
+                                        <tr>
                                             <td>{{ficha.pk}}</td>
                                             <td>{{ficha.variable}}</td>
                                             <td>{% if ficha.valor %}
@@ -79,7 +75,7 @@
                                             <td><a href="#">Restaurar</a></td>
                                         </tr>
                                     {% empty %}
-                                        <tr class="danger">No Hay Datos</tr>
+                                        <tr class="danger"> 0 Configuraciones </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>

@@ -145,24 +145,19 @@
         <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav side-nav">
-                <li class="active">
-                    <a href="index.html"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
-                </li>
+                <li class="active"><a href="index.html"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a></li>
                 <li><a href="{% url 'sbadmin_externo' %}"><i class="fa fa-fw fa-cloud-download"></i> Datos Externos</a></li>
                 <li><a href="{% url 'sbadmin_config' %}"><i class="fa fa-fw fa-cog"></i> Configuración</a></li>
+                <li><a href="{% url 'sbadmin_myurls' %}"><i class="fa fa-fw fa-external-link"></i> My URLs</a></li>
+                <li><a href="{% url 'sbadmin_productos' %}"><i class="fa fa-fw fa-archive"></i> Productos</a></li>
+                <li><a href="{% url 'sbadmin_categorias' %}"><i class="fa fa-fw fa-book"></i> Categorías</a></li>
+                <hr>
+                <li><a href="{% url 'sbadmin_tables' %}"><i class="fa fa-fw fa-table"></i> Tables</a></li>
+                <li><a href="{% url 'sbadmin_forms' %}"><i class="fa fa-fw fa-edit"></i> Forms</a></li>
+                <hr>
                 <li><a href="charts.html"><i class="fa fa-fw fa-bar-chart-o"></i> Charts</a></li>
-                <li>
-                    <a href="tables.html"><i class="fa fa-fw fa-table"></i> Tables</a>
-                </li>
-                <li>
-                    <a href="forms.html"><i class="fa fa-fw fa-edit"></i> Forms</a>
-                </li>
-                <li>
-                    <a href="bootstrap-elements.html"><i class="fa fa-fw fa-desktop"></i> Bootstrap Elements</a>
-                </li>
-                <li>
-                    <a href="bootstrap-grid.html"><i class="fa fa-fw fa-wrench"></i> Bootstrap Grid</a>
-                </li>
+                <li><a href="bootstrap-elements.html"><i class="fa fa-fw fa-desktop"></i> Bootstrap Elements</a></li>
+                <li><a href="bootstrap-grid.html"><i class="fa fa-fw fa-wrench"></i> Bootstrap Grid</a></li>
                 <li>
                     <a href="javascript:;" data-toggle="collapse" data-target="#demo"><i class="fa fa-fw fa-arrows-v"></i> Dropdown <i class="fa fa-fw fa-caret-down"></i></a>
                     <ul id="demo" class="collapse">
@@ -189,9 +184,26 @@
 {% block bootstrap4_content %}
     
     <div id="wrapper">
-
+        <br><br>
         {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
-
+        {% block bootstrap4_salida %}
+            {{ block.super }}
+            {% if salida %}
+                <!-- Mensages del Sistema -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="alert alert-{{ salida.estado }} alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>             
+                            <fieldset>
+                                <legend><i class="fa fa-trophy"></i> {{ salida.txto }} <i class="fa fa-trophy"></i></legend>
+                                {{salida.detail|safe}}
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+            {% endif %}
+        {% endblock %}
         {% block content %}(no content){% endblock %}
     
     </div> <!-- Wrapper -->
@@ -200,6 +212,14 @@
 
 {% block bootstrap4_after_content %}
     {{ block.super }}
+     <!-- Footer -->
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">This is <em>bootstrap4</em> for <strong>Django</strong>.</p>    
+            <p class="m-0 text-center text-white">Copyright &copy; Catálogo Diabla Roja 2018</p>
+        </div>
+        <!-- /.container -->
+    </footer>
 {% endblock %}
 
 {% block bootstrap4_extra_script %}
