@@ -1,0 +1,9 @@
+{% load static %}
+{% if ficha %}
+    {% include "./product_ficha.html" %}
+    {{ficha}}
+{% endif %}
+{% if lista %}
+    {% include "./product_grid.html" %}
+    {{lista}}
+{% endif %}

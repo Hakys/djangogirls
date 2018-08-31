@@ -1,0 +1,103 @@
+{% extends './base.html' %}
+{% load static %}
+{% block title %}Listado y Filtros - {{ block.super }}{% endblock %}
+{% block container %}
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-content bg padding-y-sm">
+    <div class="container">
+        {% include './filter-row.html' %}
+        <div class="padding-y-sm">
+            <span>{{ num_result }} resultados para "{{search}}"</span>	
+        </div>
+        <div class="row-sm">
+            {% for ficha in product_set %}
+                <div class="col-md-3">
+                    <figure class="card card-product">
+                        <div class="img-wrap"> 
+                            <a href=" url 'producto-ficha' slug=ficha.slug " class="title">
+                                <img alt="{{ ficha.imagenes.all.0.name }}" title="{{ ficha.imagenes.all.0.name }}"
+                                {% if ficha.imagenes.all.0.url %} 
+                                    src="{{ ficha.imagenes.all.0.url }}" 
+                                {% else %}
+                                    src="{% static 'media/no-foto.jpg' %}"
+                                {% endif %}>
+                            </a>
+                            <div class="float-right m-1">
+                                <a href="{% url 'product-listado' jerarquia=ficha.fabricante.slug %}">XXX</a>
+                                    {{ficha.get_fab_list}}    
+                                <a href="{{ ficha.fabricante.slug }}">
+                                    {% if ficha.fabricante.imagen.url %}
+                                        <img src="{{ ficha.fabricante.imagen.url }}">
+                                    {%else%}
+                                        <strong>{{ ficha.fabricante.name }}</strong>
+                                    {%endif%}
+                                </a>
+                            </div>
+                            <!--<a class="btn-overlay" href="#"><i class="fa fa-search-plus"></i> Ver Ficha</a>-->
+                        </div>
+                        <figcaption class="info-wrap">
+                            <a href=" url 'producto-ficha' slug=ficha.slug " class="title">{{ ficha.name | truncatechars:60 }}</a>
+                            <!--<p class="card-text float-left mb-2"> 
+                                <a href="/fab/{{ ficha.fabricante.parent.slug }}/{{ ficha.fabricante.slug }}/">
+                                    <img class="card-img-fab" height="30px"
+                                        {% if ficha.image.url %}
+                                            src="{{ ficha.fabricante.imagen.url }}" 
+                                        {% else %}
+                                            src="{% static 'media/no-foto.jpg' %}"
+                                        {% endif %}
+                                        alt="{{ ficha.product_id.fabricante.name }}" title="{{ ficha.product_id.fabricante.name }}">
+                                    <strong>{{ ficha.product_id.fabricante.name }}</strong> 
+                                </a> 
+                            </p>-->
+                            <div class="action-wrap">
+                                {% if ficha.release_date >= hoy %}
+                                    {% if ficha.new %}
+                                        <a href="#" class="btn btn-primary btn-sm float-right">Lanzamiento<br>{{ ficha.release_date|date:"d/m/Y" }}</a>
+                                    {% else %}    
+                                        <a href="#" class="btn btn-warning btn-sm float-right">Reposición<br>{{ ficha.release_date|date:"d/m/Y" }}</a>
+                                    {% endif %}
+                                {% else %}
+                                    {% if not ficha.stock %}                                
+                                        {% if ficha.updated == date_min %}
+                                            <a href="#" class="btn btn-warning btn-sm float-right disabled">Sin Reposición</a>
+                                        {%else%}
+                                            <a href="#" class="btn btn-outline-danger float-right disabled"><strong>Agotado</strong></a>
+                                        {% endif %}
+                                    {% else %}
+                                        {% if ficha.available %}
+                                            <a href="#" class="btn btn-danger  float-right">Comprar</a>
+                                        {% else %}
+                                            <a href="#" class="btn btn-success btn-sm float-right">Reposición<br>{{ ficha.release_date|date:"d/m/Y" }}</a>
+                                        {% endif %}                             
+                                    {% endif %}
+                                {% endif %}
+                                <!--
+                                {% if ficha.sale %}
+                                    <div class="alert alert-danger py-1 m-0 mr-2" role="alert" style="vertical-align:middle" >Rebajado</div>{% endif %}
+                                {% if ficha.destocking %}
+                                    <div class="alert alert-dark py-1 m-0 mr-2" role="alert" style="vertical-align:middle" >Descatalogado</div>{% endif %}
+                                -->
+                                <div class="price-wrap h5">
+                                    <span class="price-new">{{ ficha.pvp }} €</span>
+                                    <del class="price-old">{{ ficha.price }} €</del>
+                                </div> <!-- price-wrap.// -->
+                            </div> <!-- action-wrap -->
+                        </figcaption>
+                    </figure> <!-- card // -->
+                </div> <!-- col // -->
+            {% endfor %}
+        </div> <!-- row.// -->
+        <div class="row">
+            <div class="col-lg-3"></div>
+            <div class="col-sm-12 col-lg-6 align-content-center">
+                {% include './pagination.html' %}
+                <p class="text-center"><small>{{num_result}} Producto/s</small></p>
+            </div>
+            <div class="col-lg-3"></div>
+        </div>
+        <!-- /.row -->
+    </div><!-- container // -->
+</section>
+<!-- ========================= SECTION CONTENT .END// ========================= -->
+
+{% endblock %}

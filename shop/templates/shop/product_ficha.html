@@ -1,0 +1,257 @@
+{% extends './base.html' %}
+{% load bootstrap4 %}
+{% load static %}
+{% block title %}Ficha del Producto{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="row no-gutters">
+        <h2>
+        <ol class="breadcrumb ml-2">
+            <li class="breadcrumb-item"><strong><a href=" url 'fabricante_home' ">CATEGORÍAS </a></strong></li>
+            {% if breadcrumbs %}
+                {% for slug,name in breadcrumbs %}
+                    <li class="breadcrumb-item"><a href=" url 'fabricante_detail' slug=slug ">{{ name | upper }}</a></li>
+                {% endfor %}
+            {% endif %}
+        </ol></h2>
+    </div>
+    <div class="row no-gutters">
+        <aside class="col-sm-6 border-right">
+            <!--
+            <article class="gallery-wrap"> 
+                <div class="img-big-wrap">
+                    <div> <a href="{{ ficha.imagenes.all.0.url }}" data-fancybox=""><img src="{{ ficha.imagenes.all.0.url }}"></a></div>
+                </div> !-- slider-product.// --
+                <div class="img-small-wrap">
+                    {% for image in ficha.imagenes.all %}
+                        <div class="item-gallery"> <img src="{{ image.url }}" alt="{{ image.name }}" title="{{ image.name }}"></div>
+                    {% endfor %}
+                </div> !-- slider-nav.// --
+            </article> !-- gallery-wrap .end// --
+            -->
+            <div class="tab-content">
+                {% for image in ficha.imagenes.all %}
+                    <div id="{{ image.pk }}" class="container tab-pane {% if image.preferred %}active{% else %}fade{% endif %}">
+                        <img class="replace-2x img-responsive" src="{{ image.url }}" alt="{{ image.name }}"
+                            title="{{ image.name }}" width="100%">
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="row content btn-toolbar mt-1 pl-3" role="toolbar" aria-label="Toolbar with button groups">                
+                {% if ficha.imagenes.all.count > 1 %}
+                <nav>
+                    <ul class="nav nav-tabs" role="tablist">
+                        {% for image in ficha.imagenes.all %}                    
+                            <li class="nav-item">
+                                <a data-toggle="tab" href="#{{ image.pk }}" class="nav-link{% if image.preferred %} active{% endif %}">
+                                    <img class="replace-2x img-responsive" src="{{ image.url }}" alt="{{ image.name }}"
+                                        title="{{ image.name }}" width="50">
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </aside>
+        <aside class="col-sm-6">
+            <article class="p-5">
+                <h3 class="title mb-3">{{ficha.name}}</h3>
+                <div class="mb-3"> 
+                    <var class="price h3 text-danger"> 
+                       <span class="num">{{ ficha.pvp | floatformat:2 }}</span><span class="currency"> €</span>
+                    </var>  
+                    <var class="price h3 text-danger"> 
+                        <del class="price-old"><span class="num">{{ ficha.price | floatformat:2 }}</span><span class="currency"> €</span></del>
+                    </var>  
+                    <!-- <span>/per kg</span> -->
+                </div> <!-- price-detail-wrap .// -->
+                {% if not ficha.description == ficha.name %}
+                <dl>
+                    <dt>Descripción</dt>
+                    <dd><p>{{ ficha.description }}</p></dd>
+                </dl>
+                {% endif %}
+                <dl class="row">
+                    <dt class="col-sm-3">Referencia</dt><dd class="col-sm-9">{{ ficha.ref }}</dd>
+                    <dt class="col-sm-3">Categorías</dt><dd class="col-sm-9">
+                       <a href="url 'category' slug='ficha.category.slug'{{ ficha.category.pk }}" class="align-middle" >
+                            <img height="40px"
+                                {% if ficha.category.imagen %}
+                                    src="{{ ficha.category.imagen.url }}" 
+                                {% else %}
+                                    src="{% static 'media/no-foto.jpg' %}"
+                                {% endif %}
+                                alt="{{ ficha.category.name }}" title="{{ ficha.category.name }}">
+                            {{ ficha.category.name | upper }}</a></dd>
+                    <dt class="col-sm-3">Fabricante</dt><dd class="col-sm-9">                        
+                        <a href="url 'marca' slug='ficha.fabricante.slug'{{ ficha.fabricante.pk }}" >
+                            <img height="40px"
+                                {% if ficha.fabricante.imagen %}
+                                    src="{{ ficha.fabricante.imagen.url }}" 
+                                {% else %}
+                                    src="{% static 'media/no-foto.jpg' %}"
+                                {% endif %}
+                                alt="{{ ficha.fabricante.name }}" title="{{ ficha.fabricante.name }}">
+                            {{ ficha.fabricante.name | upper }}</a></dd>
+                </dl>
+                <div class="rating-wrap">
+                    <ul class="rating-stars">
+                        <li style="width:80%" class="stars-active"> 
+                            <i class="fa fa-star"></i> <i class="fa fa-star"></i> 
+                            <i class="fa fa-star"></i> <i class="fa fa-star"></i> 
+                            <i class="fa fa-star"></i> 
+                        </li>
+                        <li>
+                            <i class="fa fa-star"></i> <i class="fa fa-star"></i> 
+                            <i class="fa fa-star"></i> <i class="fa fa-star"></i> 
+                            <i class="fa fa-star"></i> 
+                        </li>
+                    </ul>
+                    <div class="label-rating">132 reviews</div>
+                    <div class="label-rating">154 orders </div>
+                </div> <!-- rating-wrap.// -->
+                <hr>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <dl class="dlist-inline">
+                            <dt>Cantidad: </dt>
+                            <dd> 
+                                <select class="form-control form-control-sm" {% if not ficha.available %} disabled{% endif %} style="width:70px;">
+                                    <option> 1 </option>
+                                    <option> 2 </option>
+                                    <option> 3 </option>
+                                    <option value="{{ ficha.stock }}">{{ ficha.stock }} {{ ficha.unit_of_measurement}} </option>
+                                </select>
+                            </dd>
+                        </dl>  <!-- item-property .// -->
+                    </div> <!-- col.// -->
+                    <div class="col-sm-6">
+                        <dl class="dlist-inline">
+                            <dt>Estado: </dt>
+                            <dd> 
+                                {% if ficha.available %}<span class="text-success">DISPONIBLE</span> 
+                                {% else %}<span class="text-danger">NO DISPONIBLE</span>{% endif %} 
+                            </dd>
+                        </dl>  <!-- item-property .// -->
+                    </div><!-- col.// -->
+                    
+                    <!--
+                    <div class="col-sm-7">
+                        <dl class="dlist-inline">
+                            <dt>Size: </dt>
+                            <dd>
+                                <label class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2">
+                                    <span class="form-check-label">SM</span>
+                                </label>
+                                <label class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2">
+                                    <span class="form-check-label">MD</span>
+                                </label>
+                                <label class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2">
+                                    <span class="form-check-label">XXL</span>
+                                </label>
+                            </dd>
+                        </dl>  !-- item-property .// --
+                    </div> !-- col.// --
+                    -->
+                </div> <!-- row.// -->
+                <hr>
+                <div class="row">           
+                    <div class="btn-group" role="group">                                            
+                        {% if ficha.new %}
+                            <div class="alert alert-success py-1 m-0 mr-2" role="alert" >Nuevo</div>{% endif %}
+                        {% if ficha.release_date >= hoy %}
+                            {% if ficha.new %}
+                                <div class="alert alert-primary py-1 m-0 mr-2" role="alert">Lanzamiento {{ ficha.release_date|date:"d/m/Y" }}</div>
+                            {% else %}    
+                                <div class="alert alert-warning py-1 m-0 mr-2" role="alert">Reposición {{ ficha.release_date|date:"d/m/Y" }}</div>
+                            {% endif %}
+                        {% else %}
+                            {% if not ficha.stock %}
+                                <div class="alert alert-danger py-1 m-0 mr-2" role="alert" style="vertical-align:middle">Agotado</div>
+                                {% if ficha.updated == date_min %}
+                                    <div class="alert alert-secondary py-1 m-0 mr-2" role="alert" style="vertical-align:middle">Sin Reposición</div>{% endif %}
+                            {% else %}
+                                {% if ficha.available %}
+                                    <!--<div class="alert alert-success ml-1 pl-2 pr-2" role="alert">Disponible {{ ficha.stock }} {{ ficha.unit_of_measurement}}</div>-->
+                                    <a href="#" class="btn btn-danger"> Comprar Ahora </a>
+                                    <a href="#" class="btn btn-outline-danger"> <i class="fas fa-shopping-cart"></i> Añadir al Carro </a>
+                                {% else %}
+                                    <div class="alert alert-warning py-1 m-0 mr-2" role="alert">Reposición {{ ficha.release_date|date:"d/m/Y" }}</div>
+                                {% endif %}                             
+                            {% endif %}
+                        {% endif %}
+                        {% if ficha.sale %}
+                            <div class="alert alert-danger py-1 m-0 mr-2" role="alert" style="vertical-align:middle" >Rebajado</div>{% endif %}
+                        {% if ficha.destocking %}
+                            <div class="alert alert-dark py-1 m-0 mr-2" role="alert" style="vertical-align:middle" >Descatalogado</div>{% endif %}
+                    </div>  
+                </div><!-- row.// -->  
+                <hr>
+                <div class="my-2">
+                    <a class="btn  btn-outline-primary" href="{{ ficha.product_url }}" target="_blank" >VER PROVEEDOR REF. {{ ficha.ref }}</a>
+                    <a class="btn  btn-primary" href="url 'producto_actualizar' ref='ficha.ref'">Actualizar</a>
+                    <a class="btn  btn-outline-danger" href="url 'producto_borrar' ref='ficha.ref'" onclick="return confirm('¡¡Vas a BORRAR el Producto!!')"> Borrar</a> 
+                </div><!-- row.// -->    
+                <div class="row card">    
+                    <article class="card-group-item">
+                        <header class="card-header">
+                            <a href="#" data-toggle="collapse" data-target="#collapse33" aria-expanded="false" class="collapsed">
+                                <i class="icon-action fa fa-chevron-down"></i>
+                                <h6 class="title">Información para Vendedores</h6>
+                            </a>
+                        </header>
+                        <div class="filter-content collapse" id="collapse33" style="">
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-sm-8 text-right">F. Creación:</dt><dd class="col-sm-auto">{{ ficha.created_date|date:"d/m/Y" }}</dd>
+                                    <dt class="col-sm-8 text-right">F. Actualización:</dt><dd class="col-sm-auto">{{ ficha.updated|date:"d/m/Y, H:i" }}</dd>
+                                    <dt class="col-sm-8 text-right">F. Lanzamiento/Reposición:</dt><dd class="col-sm-auto">{{ ficha.release_date|date:"d/m/Y" }}</dd>
+                                    <dt class="col-sm-8 text-right">PVP (iva inc.):</dt><dd class="col-sm-auto">{{ ficha.pvp | floatformat:2 }} €</dd>
+                                    <dt class="col-sm-8 text-right">Precio (iva inc.):</dt><dd class="col-sm-auto">{{ ficha.price | floatformat:2 }} €</dd>
+                                    <dt class="col-sm-8 text-right">Recomendado (iva inc.):</dt><dd class="col-sm-auto">{{ ficha.recommended_retail_price | floatformat:2 }} €</dd>
+                                    <dt class="col-sm-8 text-right">Gastos de Envío({{ ficha.delivery_desc}}) (iva inc.):</dt><dd class="col-sm-auto text-danger">-{{ ficha.default_shipping_cost | floatformat:2 }} €</dd>
+                                    <dt class="col-sm-8 text-right">Precio Coste:</dt><dd class="col-sm-auto text-danger">-{{ ficha.cost_price | floatformat:2 }} €</dd>
+                                    <dt class="col-sm-8 text-right">Beneficio ({{ porc_benef|floatformat:2  }}%):</dt><dd class="col-sm-auto">{{ beneficio | floatformat:2 }} €</dd>
+                                </dl>
+                            </div> <!-- card-body.// -->
+                        </div>
+                    </article> <!-- card-group-item.// -->
+                    <article class="card-group-item">
+                        <header class="card-header">
+                            <a href="#" data-toggle="collapse" data-target="#collapse44" aria-expanded="false" class="collapsed">
+                                <i class="icon-action fa fa-chevron-down"></i>
+                                <h6 class="title">Información del Sistema</h6>
+                            </a>
+                        </header>
+                        <div class="filter-content collapse" id="collapse44" style="">
+                            <div class="card-body">
+                                <dl class="row">
+                                    <dt class="col-sm-6 text-right">Fecha de Hoy:</dt><dd class="col-sm-auto">{{ hoy }}</dd>
+                                    <dt class="col-sm-6 text-right">Fecha Min.:</dt><dd class="col-sm-auto">{{ date_min }}</dd>
+                                    <dt class="col-sm-6 text-right">available</dt><dd class="col-sm-auto">{{ ficha.available }}</dd>
+                                    <dt class="col-sm-6 text-right">destocking</dt><dd class="col-sm-auto">{{ ficha.destocking }}</dd>
+                                    <dt class="col-sm-6 text-right">sale</dt><dd class="col-sm-auto">{{ ficha.sale }}</dd>
+                                    <dt class="col-sm-6 text-right">new</dt><dd class="col-sm-auto">{{ ficha.new }}</dd>
+                                    <dt class="col-sm-6 text-right">stock</dt><dd class="col-sm-auto">{{ ficha.stock }}</dd>
+                                </dl>
+                            </div> <!-- card-body.// -->
+                        </div>
+                    </article> <!-- card-group-item.// -->
+                </div> <!-- card.// -->
+            </article> <!-- card-body.// -->
+        </aside> <!-- col.// -->
+    </div> <!-- row.// -->
+    <div class="row no-gutters">
+        <aside class="col-sm-12">
+            <dl class="rte text-justify m-3">
+                <dt>Descripción</dt>
+                <dd><p>{{ ficha.html_description|safe }}</p></dd>
+            </dl>
+        </aside> <!-- col.// -->
+    </div> <!-- row.// -->
+</div> <!-- card.// -->
+{% endblock %}

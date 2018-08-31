@@ -27,15 +27,18 @@
                 <!-- /.row -->
                 <div class="row">
                     <div class="col-lg-7">
-                        <h2>Origenes de Datos</h2>
+                        <h2>Origenes de Datos
+                            <span class="pull-right"> 
+                                <a href="{% url 'cron' %}" target="_blank" alt="Sincronizardor CRON"><i class="fa fa-fw fa-retweet"></i></a>
+                                <a href="/admin/shop/externo/add/" target="_blank"><i class="fa fa-fw fa-plus-circle"></i></a>
+                            </span>
+                        </h2>
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover table-striped">
                                 <thead>
                                     <tr>
-                                        <th></th>
                                         <th>Proveedor</th>
-                                        <th>URL</th>
-                                        <th>Fichero</th>                                        
+                                        <th>URL</th>                                                                                
                                         <th>Fecha Actualización</th>
                                         <th colspan="2">Acciones</th>
                                     </tr>
@@ -43,85 +46,28 @@
                                 <tbody>
                                     {% for ficha in lista %}
                                         <tr>
-                                            <td>{{ ficha.pk}}</td>
-                                            <td>{{ficha.name}}</td>
-                                            <td><a href="{{ficha.url}}" target="_blank">URL</a></td>
-                                            <td><a href="/static/store/{{ficha.file.name}}" target="_blank">Local File</a></td>
-                                            <td>{{ficha.updated_date|date:"d/m/Y - H:i "}}</td>
-                                            <td>
-                                                <a href="{% url 'externo_importar' pk=ficha.pk %}"><i class="fa fa-fw fa-download"></i>Fichero</a>
+                                            <td><a href="/admin/shop/configuracion/{{ficha.pk}}/change/">{{ficha.name}}</a></td>
+                                            <td><a href="{{ficha.url}}" target="_blank">URL</a></td>                                            
+                                            <td><i class="fa fa-clock-o"></i>
+                                                <a href="{% url 'externo_importar' pk=ficha.pk %}" alt="Importar">
+                                                    {{ficha.updated_date|date:"d/m/Y - H:i "}}<i class="fa fa-fw fa-download"></i></a></td>
+                                            <td class="text-justify">
                                                 <a href="{% url 'procesar_productos' pk=ficha.pk %}"><i class="fa fa-fw fa-download"></i>Productos</a>
                                                 <a href="{% url 'procesar_categorias' pk=ficha.pk %}"><i class="fa fa-fw fa-download"></i>Categorías</a>
+                                                <a href="{% url 'procesar_fabricantes' pk=ficha.pk %}"><i class="fa fa-fw fa-download"></i>Fabricantes</a>
+                                                <a href="{% url 'procesar_imagenes' pk=ficha.pk %}"><i class="fa fa-fw fa-download"></i>Imagenes</a>
                                             </td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
+                                <tfoot>
+                                    <tr><td colspan="9" class="text-center"><small>{{num_exte}} Fichero/s Externo/s</small></td></tr>
+                                </tfoot>
                             </table>
-                        </div>
-                        <div class="row align-content-center justify-content-center">
-                            {{num_exte}} Fichero/s Externo/s
                         </div>
                     </div>
-
-                    <div class="col-lg-5">
-                            <a href="{% url 'cron' %}" target="_blank">Ejecutar Tarea CRON</a> 
-                        <h2>Contextual Classes</h2>
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Page</th>
-                                        <th>Visits</th>
-                                        <th>% New Visits</th>
-                                        <th>Revenue</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="active">
-                                        <td>/index.html</td>
-                                        <td>1265</td>
-                                        <td>32.3%</td>
-                                        <td>$321.33</td>
-                                    </tr>
-                                    <tr class="success">
-                                        <td>/about.html</td>
-                                        <td>261</td>
-                                        <td>33.3%</td>
-                                        <td>$234.12</td>
-                                    </tr>
-                                    <tr class="warning">
-                                        <td>/sales.html</td>
-                                        <td>665</td>
-                                        <td>21.3%</td>
-                                        <td>$16.34</td>
-                                    </tr>
-                                    <tr class="danger">
-                                        <td>/blog.html</td>
-                                        <td>9516</td>
-                                        <td>89.3%</td>
-                                        <td>$1644.43</td>
-                                    </tr>
-                                    <tr>
-                                        <td>/404.html</td>
-                                        <td>23</td>
-                                        <td>34.3%</td>
-                                        <td>$23.52</td>
-                                    </tr>
-                                    <tr>
-                                        <td>/services.html</td>
-                                        <td>421</td>
-                                        <td>60.3%</td>
-                                        <td>$724.32</td>
-                                    </tr>
-                                    <tr>
-                                        <td>/blog/post.html</td>
-                                        <td>1233</td>
-                                        <td>93.2%</td>
-                                        <td>$126.34</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="col-lg-5">                        
+                        {% include 'sb-admin/model-resumen.html' %} 
                     </div>
                 </div>
                 <!-- /.row -->

@@ -1,0 +1,32 @@
+{% load static %}
+{% load bootstrap4 %}
+
+<h2><img src="{% static '/media/mysqlwebadmin.png' %}" alt="PHPMyAdmin" style="max-width: 35px;"> Estadísticas Datos del Sistema</h2>
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th>Modelo</th>
+            <th>Cantidad</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>Ficheros Externos</td><td>{{n_externo}}</td><td></td></tr>
+        <tr><td>Parámetros de Configuración</td><td>{{n_configuracion}}</td><td></td></tr>
+        <tr><td>My URLs</td><td>{{n_myurls}}</td><td></td></tr>
+        <tr><td>Productos</td><td>{{n_product}}</td><td></td></tr>
+        <tr><td>Categorías y Marcas</td><td>{{n_category}}</td><td></td></tr>
+        <tr><td>Marcas</td><td>{{n_marcas}}</td><td></td></tr>
+        <tr><td>Imagenes</td><td>{{n_imagenes}}</td><td></td></tr>
+    </tbody>
+    <tfoot>
+        <span class="btn-group-sm w-100 justify-content-center " role="group" aria-label="Base de Datos">
+            <a class="btn btn-primary" target="_blank" alt="PHPMyAdmin" href="http://localhost/phpmyadmin/db_structure.php?server=1&db=wordpress_60&token=6cc5bca3c76f243cda7f79d67a3e0ff3" >
+                <i class="fa fa-fw fa-database"></i> LocalHost </a>
+            <a class="btn btn-primary " target="_blank" alt="PHPMyAdmin Loading.es" href="https://lin135.loading.es:8443/domains/databases/phpMyAdmin/index.php?db=sex-shop-huelva" >
+                <i class="fa fa-fw fa-database"></i> Loading.es SEX-SHOP-HUELVA</a>
+            <a class="btn btn-primary" target="_blank" alt="PHPMyAdmin Loading.es" href="https://lin135.loading.es:8443/domains/databases/phpMyAdmin/index.php?db=wordpress_60" >
+                <i class="fa fa-fw fa-database"></i> Loading.es WORDPRESS_60</a>
+        </span>
+    </tfoot>
+</table>

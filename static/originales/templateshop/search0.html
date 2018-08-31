@@ -1,0 +1,25 @@
+<form id="search" method="POST" action="{% url 'search' %}">
+    {% csrf_token %}
+    <input type="text" class="form-control" id="txtSearch" name="txtSearch">
+    <button type="submit" class="btn btn-default btn-submit">Submit</button>
+</form>
+<hr>
+<form id="form" role="form" action="{% url 'search-submit' %}" method="post">
+    {% csrf_token %}
+    <input name="search" id="search" type="search" placeholder="Search"/>
+    <button type="submit">Submit</button>
+</form>
+<hr>
+<form id="form2" role="form" action="{% url 'search-submit' %}" method="post">
+        {% csrf_token %}
+        <input name="search"
+               id="search"
+               type="search"
+               placeholder="Start typing here"
+               ic-post-to="{% url 'search-ajax-submit' %}"
+               ic-trigger-on="keyup changed"
+               ic-trigger-delay="300ms"
+               ic-target="#search-result-container"/>
+        <button type="submit">Search</button>
+    </form>
+    <span id="search-result-container"></span>

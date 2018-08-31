@@ -1,0 +1,62 @@
+{% load static %}
+{% load bootstrap4 %}
+
+<h2>Productos Asociados</h2>
+<div class="table-responsive"> 
+    <table class="table table-bordered table-hover table-striped">
+        <thead>
+            <tr>
+                <th>Productos</th>
+            </tr>
+        </thead>                                
+        <tbody>
+            {% for ficha in lista2 %}
+                <tr>
+                    <td>
+                        <div class="media">
+                            <span class="pull-left">
+                                <img class="" src="{{ ficha.imagenes.all.0.url }}" alt="{{ ficha.imagenes.all.0.name }}"
+                                    title="{{ ficha.imagenes.all.0.name }}" height="60px" width="60px">
+                            </span>
+                            <div class="media-body w-auto">
+                                <a href="/admin/shop/product/{{ficha.pk}}/change/" target="_blank">
+                                <h5 class="media-heading"><strong>{{ficha.name}}</strong></h5></a>
+                                <a href="{{ficha.ref}}/actualizar/">
+                                <p class="small text-muted"><i class="fa fa-clock-o"></i> {{ficha.updated|date:"d/m/Y, H:i" }}<i class="fa fa-file-download"></i> Update</p></a>
+                                <p><a href="{{ficha.product_url}}" target="_blank"><i class="fa fa-external-link"></i> {{ficha.ref}}</a></p>
+                            </div>
+                            <span class="pull-right text-right">
+                                <ul style="list-style:none;">
+                                    <li>PVP</li>
+                                    <li>Recomendado</li>
+                                    <li>Coste</li>
+                                    <li>Stock</li>
+                                </ul>
+                            </span>
+                            
+                                <ul class="text-right pull-right"  style="list-style:none;">
+                                    <li>{{ ficha.pvp | floatformat:2 }} €</li>
+                                    <li>{{ ficha.price | floatformat:2 }} €</li>
+                                    <li class="text-danger">-{{ ficha.cost_price | floatformat:2 }} €</li>
+                                    <li class="{% if ficha.stock %}text-success{%else%}text-danger{%endif%}"><strong>{{ ficha.stock }}</strong> </li>
+                                </ul>
+                            
+                        </div>
+                    </td>                                                                                                  
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="9" class="text-center"><small>{{num_prod}} Producto/s</small></td>
+            </tr>
+            {% if num_pages2 > 1 %}
+            <tr>
+                <td colspan="9" class="text-center">
+                    {% bootstrap_pagination lista2 url="?page2=1&flop=flip" extra="q=foo" size="medium" %}
+                </td>
+            </tr>
+            {% endif %}
+        </tfoot>
+    </table> 
+</div>

@@ -1,0 +1,145 @@
+{% extends './base.html' %}
+{% load bootstrap4 %}
+{% load static %}
+{% block title %}Ficha del Producto{% endblock %}
+
+{% block content %}
+    <style>
+        .list-group-item {
+            padding: .25rem 1rem;
+            border: 0px solid rgba(0,0,0,.125);
+        }
+        h2 {
+            font-size: 1.5rem;
+        }
+        .alert{
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
+    <h2>{{ ficha.name }}</h2>
+    <div class="row product">     
+        <div class="pb-left-column col-xs-12 col-sm-6 col-md-6">            
+            <div class="tab-content">
+                {% for image in images %}
+                    <div id="{{ image.pk }}" class="container tab-pane {% if image.preferred %}active{% else %}fade{% endif %}">
+                        <img class="replace-2x img-responsive" src="{{ image.src }}" alt="{{ image.title }}"
+                            title="{{ image.title }}" width="100%">
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="row content btn-toolbar mt-1" role="toolbar" aria-label="Toolbar with button groups">                
+                {% if not images.count == 1 %}
+                <nav>
+                    <ul class="nav nav-tabs" role="tablist">
+                        {% for image in images %}                    
+                            <li class="nav-item">
+                                <a data-toggle="tab" href="#{{ image.pk }}" class="nav-link{% if image.preferred %} active{% endif %}">
+                                    <img class="replace-2x img-responsive" src="{{ image.src }}" alt="{{ image.title }}"
+                                        title="{{ image.title }}" width="50">
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>   
+        <div class="pb-right-column col-xs-12 col-sm-6 col-md-6">
+            <h6 class="h6 secondary">{{ ficha.description }}</h6>
+            <div class="card-body" style="width: 25rem;">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <h1 class="alert alert-danger ml-1 pl-2 pr-2" role="alert">PVP: {{ ficha.pvp | floatformat:2 }} € </h1></li>
+                    <li class="list-group-item">Stock: {{ ficha.stock }} {{ ficha.unit_of_measurement}} </li> 
+                    <li class="list-group-item">Estado:{% if ficha.available %} DISPONIBLE {% else %} NO DISPONIBLE {% endif %} </li> 
+                </ul>
+            </div>       
+            
+
+                <div class="card-body">
+                    {% if user.is_authenticated %} 
+                        <h6>Sección del Vendedor</h6>  
+                    {% endif %}
+                    <ul class="list-inline">
+                        <li class="list-inline-item">REF: {{ ficha.ref }}</li>
+                        <li class="list-inline-item"><a class="m-2" href="{{ ficha.product_url }}" target="_blank" >
+                            <img class="img-responsive" src="{% static 'img/logo.png' %}" alt="DreamLove.es" height="30px"></a></li>
+                        <li class="list-inline-item">
+                            <a class="alert-link" href="">Actualizar</a></li>
+                        <li class="list-inline-item">
+                            <a class="alert-link" href="" 
+                                onclick="return confirm('¡¡Vas a BORRAR el Producto!!')"> Borrar</a></li>
+                    </ul>
+                    <div class="card mb-2" style="width: 18rem;">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Creado: {{ ficha.created_date|date:"d/m/Y" }}</li>
+                            <li class="list-group-item">Actualizado: {{ ficha.updated|date:"d/m/Y, H:i" }}</li>
+                            <li class="list-group-item">Lanzamiento: {{ ficha.release_date|date:"d/m/Y" }}</li>                        
+                            <li class="list-group-item">Coste: {{ ficha.cost_price | floatformat:2 }} € </li>
+                            <li class="list-group-item">Beneficio ({{ porc_benef|floatformat:2  }}%): {{ beneficio | floatformat:2 }} € </li>  
+                            <li class="list-group-item">Gastos de Envío ({{ ficha.delivery_desc}}) (iva inc.): {{ ficha.default_shipping_cost | floatformat:2 }} € </li>
+                            <li class="list-group-item">Precio (iva inc.): {{ ficha.price | floatformat:2 }} € </li>
+                            <li class="list-group-item">Recomendado (iva inc.): {{ ficha.recommended_retail_price | floatformat:2 }} € </li>
+                        </ul> 
+                    </div>    
+                    <div class="card mb-2" style="width: 18rem;">
+                        <ul class="list-group list-group-flush">  
+                            <li class="list-group-item">hoy: {{ hoy }}</li>
+                            <li class="list-group-item">min: {{ date_min }}</li>
+                            <li class="list-group-item">available {{ ficha.available }}</li>
+                            <li class="list-group-item">destocking {{ ficha.destocking }}</li>
+                            <li class="list-group-item">sale {{ ficha.sale }}</li>
+                            <li class="list-group-item">new {{ ficha.new }}</li>
+                            <li class="list-group-item">stock {{ ficha.stock }}</li>
+                        </ul>
+                    </div>
+                </div>
+            
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="btn-group btn-group-sm  ml-3" role="group" aria-label="First group">                                             
+                        {% if ficha.new %}
+                            <div class="alert alert-success ml-1 pl-2 pr-2" role="alert" style="vertical-align:middle" >Nuevo</div>{% endif %}
+                        {% if ficha.release_date >= hoy %}
+                            {% if ficha.new %}
+                                <div class="alert alert-primary ml-1 pl-2 pr-2" role="alert">Lanzamiento {{ ficha.release_date|date:"d/m/Y" }}</div>
+                            {% else %}    
+                                <div class="alert alert-warning ml-1 pl-2 pr-2" role="alert">Reposición {{ ficha.release_date|date:"d/m/Y" }}</div>
+                            {% endif %}
+                        {% else %}
+                            {% if not ficha.stock %}
+                                <div class="alert alert-danger ml-1 pl-2 pr-2" role="alert" style="vertical-align:middle">Agotado</div>
+                                {% if ficha.updated == date_min %}
+                                    <div class="alert alert-secondary" role="alert" style="vertical-align:middle">Sin Reposición</div>{% endif %}
+                            {% else %}
+                                {% if ficha.available %}
+                                    <div class="alert alert-success ml-1 pl-2 pr-2" role="alert">Disponible {{ ficha.stock }} {{ ficha.unit_of_measurement}}</div>
+                                {% else %}
+                                    <div class="alert alert-warning ml-1 pl-2 pr-2" role="alert">Reposición {{ ficha.release_date|date:"d/m/Y" }}</div>
+                                {% endif %}                             
+                            {% endif %}
+                        {% endif %}
+                        {% if ficha.sale %}
+                            <div class="alert alert-danger ml-1 pl-2 pr-2" role="alert" style="vertical-align:middle" >Rebajado</div>{% endif %}
+                        {% if ficha.destocking %}
+                            <div class="alert alert-dark ml-1 pl-2 pr-2" role="alert" style="vertical-align:middle" >Descatalogado</div>{% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <h6>Caracteristicas</h6>
+            </div>
+            <div class="row">
+                <h6>Fabricantes y Marcas</h6>
+            </div>
+        </div>
+        <div class="row ident">
+            <div class="pb-center-column col-xs-12">
+                <div class="rte text-justify">
+                    <p>{{ ficha.html_description|safe }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

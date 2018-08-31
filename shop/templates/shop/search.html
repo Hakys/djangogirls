@@ -1,0 +1,12 @@
+<form id="form2" role="form" action="{% url 'search-submit' %}" method="post">
+    {% csrf_token %}
+    <input name="search"
+            id="search"
+            type="search"
+            placeholder="Start typing here"
+            ic-post-to="{% url 'search-ajax-submit' %}"
+            ic-trigger-on="keyup changed"
+            ic-trigger-delay="300ms"
+            ic-target="#search-result-container"/>
+    <button type="submit">Search</button>
+</form>

@@ -1,0 +1,12 @@
+{% extends './base.html' %}
+{% load bootstrap4 %}
+{% load static %}
+{% block content %}
+    <h1>{{n_result}} RESULTADO/S</h1>
+    {% if lista %}
+        {% include "./product_grid.html"  %}  
+    {% endif %}
+    {% if ficha %}
+        {% include "./product_ficha.html" %} 
+    {% endif %}
+{% endblock %}

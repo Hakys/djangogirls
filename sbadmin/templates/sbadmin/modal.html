@@ -1,0 +1,51 @@
+{% load static %}
+{% if salida %} 
+    <!-- Modal -->
+    <script>$(document).ready(function(){$('#myModal').modal();});</script> 
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel"> {{ salida.title }}</h4>
+                    </div>
+                    <div class="modal-body text-{{ salida.estado }}"><strong>{{ salida.txto }}</strong><br>{{salida.detail|safe}}</div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">cerrar</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+    {% if tipo2 %}
+        <!-- Mensages del Sistema -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="alert alert-{{ salida.estado }} alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>             
+                    <fieldset>
+                        <legend><i class="fa fa-trophy"></i> {{ salida.txto }} <i class="fa fa-trophy"></i></legend>
+                        {{salida.detail|safe}}
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
+    {% endif %}
+    {% if tipo3 %}
+        <!-- Mensages del Sistema -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="alert alert-info alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <i class="fa fa-info-circle"></i>  <strong>Like SB Admin?</strong> Try out <a href="http://startbootstrap.com/template-overviews/sb-admin-2" class="alert-link">SB Admin 2</a> for additional features!
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
+    {% endif %}
+{% endif %}

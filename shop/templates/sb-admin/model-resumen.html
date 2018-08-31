@@ -1,0 +1,21 @@
+{% load static %}
+{% load bootstrap4 %}
+
+<h2>Estadísticas Datos del Sistema</h2>
+<table class="table table-bordered table-hover table-striped">
+    <thead>
+        <tr>
+            <th>Modelo</th>
+            <th>Cantidad</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr><td>Ficheros Externos</td><td>{{n_externo}}</td></tr>
+        <tr><td>Parámetros de Configuración</td><td>{{n_configuracion}}</td></tr>
+        <tr><td>My URLs</td><td>{{n_myurls}}</td></tr>
+        <tr><td>Productos</td><td>{{n_product}}</td></tr>
+        <tr><td>Categorías y Marcas</td><td>{{n_category}}</td></tr>
+        <tr><td>Marcas</td><td>{{n_marcas}}</td></tr>
+        <tr><td>Imagenes</td><td>{{n_imagenes}}</td></tr>
+    </tbody>
+</table>

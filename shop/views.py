@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import json
+import operator
+import xml.etree.ElementTree as ET
+from .filters import *
 from .forms import *
 from .models import *
 from decimal import *
@@ -7,14 +11,17 @@ from django.contrib import messages
 from django.core.files.storage import default_storage
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import models, IntegrityError
+from django.db.models import Q
 from django.db.models.fields.files import FieldFile
 from django.http import *
 from django.shortcuts import render, get_object_or_404, redirect, render_to_response
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.dateparse import parse_datetime
+from django.views import View
 from django.views.generic import FormView
 from django.views.generic.base import TemplateView, RedirectView
-import xml.etree.ElementTree as ET
+from sbadmin.views import *
 
 # http://yuji.wordpress.com/2013/01/30/django-form-field-in-initial-data-requires-a-fieldfile-instance/
 class FakeField(object):
@@ -22,14 +29,270 @@ class FakeField(object):
 
 fieldfile = FieldFile(None, FakeField, "dummy.txt")
 
+''' 
+#modal.html
+context['salida'] = {
+    'estado': 'danger',
+    'title': 'Mensaje del Sistema',
+    'txto': 'Producto NO Encontrado',
+    'detail': '',
+    }
+'''
 class HomePageView(TemplateView):
     template_name = "shop/home.html"
+    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         context = super(HomePageView, self).get_context_data(**kwargs)
-        messages.info(self.request, "hello http://example.com")
+        #header-main.html#
+        context['select_categorias'] = Category.objects.filter(parent=None).order_by('name')
+        
+        #prod_list = Product.objects.all() 
+        #prod_filter = ProductFilter(self.request.GET, queryset=prod_list)
+        #context['filter']=prod_filter
+        #messages.info(self.request, "hello http://example.com")
+        
         return context
 
+def todas_categorias(request, salida=[]):
+    #header-main.html#
+    select_categorias = Category.objects.filter(parent=None).order_by('name') 
+    #listing-grid.html#
+    product_set = Product.objects.all()
+    #pagination.html#
+    prod_page=get_object_or_404(Configuracion, variable='prod_page').get_valor_int()
+    paginator = Paginator(product_set, prod_page)
+    page = request.GET.get("page")
+    if page:
+        p_ini = int(page)-11
+        if p_ini < 1: p_ini = 1
+        p_fin = int(page)+11
+        if p_fin > paginator.num_pages: p_fin = paginator.num_pages
+    else:
+        p_ini = 1
+        if p_ini < 1: p_ini = 1
+        p_fin = 11
+        if p_fin > paginator.num_pages: p_fin = paginator.num_pages
+    return render(request,'shop/listing-grid.html',{ 
+        'select_categorias': select_categorias,
+        'num_result': product_set.count(),
+        'search': '',
+        'sub_categories': select_categorias,
+        'product_set': paginator.get_page(page),
+        'p_range': range(p_ini,p_fin+1),
+        'date_min': datetime(1900, 1, 1, 0, 0),
+        'hoy': datetime.today(),
+        
+    })
+
+def categorias(request, jerarquia, salida=[]):
+    #header-main.html#
+    select_categorias = Category.objects.filter(parent=None).order_by('name')
+
+    category_slug = jerarquia.split('/')
+    category_queryset = list(Category.objects.all())
+    all_slugs = [ x.slug for x in category_queryset ]
+    parent = None
+    for slug in category_slug:
+        if slug in all_slugs:
+            parent = get_object_or_404(Category,slug=slug,parent=parent)
+        else:
+            instance = get_object_or_404(Product, slug=slug)
+            breadcrumbs_link = instance.get_cat_list()
+            category_name = [' '.join(i.split('/')[-1].split('-')) for i in breadcrumbs_link]
+            breadcrumbs = zip(breadcrumbs_link, category_name)
+            return product_detail(request, instance.slug, salida)
+            #return render(request, "postDetail.html", {'instance':instance,'breadcrumbs':breadcrumbs})
+    
+    #filter-row.html#
+    breadcrumbs_link = parent.get_cat_list()
+    category_name = [' '.join(i.split('/')[-1].split('-')) for i in breadcrumbs_link]
+    breadcrumbs = zip(breadcrumbs_link, category_name)
+    
+    #pagination.html#
+    product_set=parent.product_set.all()
+    prod_page=get_object_or_404(Configuracion, variable='prod_page').get_valor_int()
+    paginator = Paginator(product_set, prod_page)
+    page = request.GET.get("page")
+    if page:
+        p_ini = int(page)-11
+        if p_ini < 1: p_ini = 1
+        p_fin = int(page)+11
+        if p_fin > paginator.num_pages: p_fin = paginator.num_pages
+    else:
+        p_ini = 1
+        if p_ini < 1: p_ini = 1
+        p_fin = 11
+        if p_fin > paginator.num_pages: p_fin = paginator.num_pages
+    return render(request,'shop/listing-grid.html',{
+        'select_categorias': select_categorias,
+        'breadcrumbs': breadcrumbs,
+        'sub_categories': parent.children.all(),
+        'num_result':parent.product_set.all().count(),
+        'search': parent.name,
+        'hoy': datetime.today(),
+        'date_min': datetime(1900, 1, 1, 0, 0),
+        'product_set': paginator.get_page(page),
+        'p_range': range(p_ini,p_fin+1),
+    })
+
+class ProductDetailView(TemplateView):
+    template_name = "shop/product-detail.html"
+
+class ListingGridView(TemplateView):
+    template_name = "shop/listing-grid.html"
+
+def product_detail(request, slug, salida=[]):
+    try:
+        product = Product.objects.get(Q(ref=slug)|Q(slug=slug))
+    except:
+        salida.append({'retorno': -1, 'salida': "Producto No Encontrado" })
+        return redirect('/productos/')    
+        return productos(request, salida)
+    breadcrumbs_link = product.get_cat_list()
+    fabricante_name = [' '.join(i.split('/')[-1].split('-')) for i in breadcrumbs_link]
+    breadcrumbs = zip(breadcrumbs_link, fabricante_name)
+    #pvp=product.get_pvp()
+    
+    iva=Decimal(product.vat/100)
+    beneficio = Configuracion.objects.get(variable='beneficio').get_valor_dec()
+    rec_equivalencia = Configuracion.objects.get(variable='rec_equivalencia').get_valor_dec()
+    
+    req=Decimal(rec_equivalencia/1000)
+    porc_benef=Decimal(beneficio/100)
+    coste_total=product.cost_price+(product.cost_price*iva)+(product.cost_price*req)
+    #'pvp':  coste_total/(1-porc_benef),
+    #'price_iva': product.price*(1+iva),
+    #'recommended_retail_price_iva': product.recommended_retail_price*(1+iva),
+    #'default_shipping_cost_iva': product.default_shipping_cost,
+    return render(request, 'shop/product-detail.html', {
+        'porc_benef': porc_benef,
+        'beneficio': (coste_total/(1-porc_benef))-coste_total,
+        'hoy': datetime.today(),
+        'date_min': datetime(1900, 1, 1, 0, 0),
+        'ficha': product, 
+        'breadcrumbs':breadcrumbs,
+        'salida':salida,
+    })
+
+
+
+'''
+class ProductListView(TemplateView):
+    template_name = "shop/product_grid.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(ProductListView, self).get_context_data(**kwargs)
+        
+        lista = Product.objects.filter(imagenes__preferred=True)
+        prod_page=get_object_or_404(Configuracion, variable='prod_page').get_valor_int()
+        paginator = Paginator(lista, prod_page)
+        page = self.request.GET.get("page")
+        context['num_prod'] = lista.count()
+        context['num_pages'] = paginator.num_pages
+        context['hoy'] = datetime.today()
+        context['date_min'] = datetime.min
+        context['lista'] = paginator.get_page(page)
+        return context
+    
+    def post(self, request):
+        template = loader.get_template(self.template)
+        query = request.POST.get('search', '')
+
+        # A simple query for Item objects whose title contain 'query'
+        items = Product.objects.filter(name__icontains=query)
+
+        context = {'title': self.response_message, 'query': query, 'items': items}
+
+        rendered_template = template.render(context, request)
+        return HttpResponse(rendered_template, content_type='text/html') 
+       
+def productos(request,salida=[]):
+    lista = Product.objects.filter(imagenes__preferred=True)
+    prod_page=get_object_or_404(Configuracion, variable='prod_page').get_valor_int()
+    paginator = Paginator(lista, prod_page)
+    page = request.GET.get("page")
+    
+    return render(request, 'shop/product_grid.html',{
+        'num_prod':lista.count(),
+        'num_pages':paginator.num_pages,
+        'hoy': datetime.today(),
+        'date_min': datetime.min,
+        'lista':paginator.get_page(page),
+        'salida':salida,
+    })
+
+class ProductView(TemplateView):
+    template_name = "shop/product_ficha.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(ProductView, self).get_context_data(**kwargs)
+        slug=kwargs['slug']
+        try:
+            query = Product.objects.filter(Q(ref=slug)|Q(slug=slug))
+        except:
+        context['n_result']=query.count()
+        if query.count() == 1:
+            context['ficha'] = query
+            return context
+        else:
+            return HttpResponseRedirect('productos')
+            return context
+            
+def search(request):
+    user_list = User.objects.all()
+    user_filter = UserFilter(request.GET, queryset=user_list)
+    return render(request, 'shop/user_list.html', {'filter': user_filter})
+
+def autocompleteModel(request):
+    if request.is_ajax():
+        q = request.GET.get('term', '').capitalize()
+        #search_qs = Product.objects.filter(ref__startswith=q)
+        search_qs = Product.objects.filter(ref__icontains=q)
+        ''
+                    Q(ref__contains=search_text) |
+                    Q(title__contains=search_text) |
+                    Q(description__contains=search_text) |
+                    Q(html_description__contains=search_text)
+                    )
+         ''           
+        results = []
+        for r in search_qs:
+            results.append(r.ref+'-'+r.name)
+        data = json.dumps(results)
+    else:
+        data = 'fail'
+    mimetype = 'application/json'
+    return HttpResponse(data, mimetype)
+    
+from django.views.generic.base import View
+
+from django.template import loader
+
+class SearchSubmitView(View):
+    template = 'shop/search_submit.html'
+    response_message = 'This is the response'
+
+    def post(self, request):
+        template = loader.get_template(self.template)
+        query = request.POST.get('search', '')
+
+        # A simple query for Item objects whose title contain 'query'
+        items = Product.objects.filter(name__icontains=query)
+
+        context = {'title': self.response_message, 'query': query, 'items': items}
+
+        rendered_template = template.render(context, request)
+        return HttpResponse(rendered_template, content_type='text/html') 
+
+class SearchAjaxSubmitView(SearchSubmitView):
+    template = 'shop/search_results.html'
+    response_message = 'This is the AJAX response'
+''
+class ProductView(SearchSubmitView):
+    template = 'shop/product.html'
+    response_message = 'This is the AJAX response'
+''
 class DefaultFormsetView(FormView):
     template_name = "shop/formset.html"
     form_class = ContactFormSet
@@ -89,66 +352,6 @@ class MiscView(TemplateView):
 class SBAdminHomeView(TemplateView):
     template_name = "sb-admin/index.html"
 
-class SBAdminExternoView(TemplateView):
-    template_name = "sb-admin/externo.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        lista = Externo.objects.all()
-        context['num_exte'] = lista.count()
-        context['lista'] = lista
-        context['salida'] = None
-        return context
-
-class SBAdminExternoImportar(TemplateView):
-    template_name = "sb-admin/externo.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        externo = get_object_or_404(Externo, pk=kwargs['pk'])
-        externo.importar()
-        externo.save()
-        context['salida'] = {'estado': 'success',
-            'txto': 'Fichero IMPORTADO con exito',
-            }
-        context['lista'] = Externo.objects.all()
-        return context
-
-class SBAdminConfigView(TemplateView):
-    template_name = "sb-admin/configuracion.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['lista'] = Configuracion.objects.all()
-        context['salida'] = ''
-        return context
-
-class SBAdminConfigDesactivar(TemplateView):
-    template_name = "sb-admin/configuracion.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        config = get_object_or_404(Configuracion, pk=kwargs['pk'])
-        config.desactivar()
-        context['lista'] = Configuracion.objects.all()
-        context['salida'] = None
-        return context
-
-class SBAdminConfigDesactivarRedirectView(RedirectView):
-    permanent = True
-    query_string = True
-    pattern_name = 'config_desactivar'
-
-    def get_redirect_url(self, *args, **kwargs):
-        #config = get_object_or_404(Configuracion, pk=kwargs['pk'])
-        #config.desactivar()
-        return super(SBAdminConfigDesactivarRedirectView).get_redirect_url(*args, **kwargs)
-
-def config_desactivar(request,pk):
-    config = get_object_or_404(Configuracion, pk=pk)
-    config.desactivar()
-    return HttpResponseRedirect('/sb-admin/config/')
-
 class SBAdminMyURLsView(TemplateView):
     template_name = "sb-admin/myurls.html"
 
@@ -162,270 +365,109 @@ class SBAdminProductView(TemplateView):
     template_name = "sb-admin/productos.html"
 
     def get_context_data(self, **kwargs):
-        prod_page=get_object_or_404(Configuracion, variable='prod_page').get_valor_int()
         context = super(SBAdminProductView, self).get_context_data(**kwargs)
-        lista = Product.objects.all()
-        paginator = Paginator(lista, prod_page)
-        page = self.request.GET.get("page")
-        try:
-            show_lines = paginator.page(page)
-        except PageNotAnInteger:
-            # If page is not an integer, deliver first page.
-            show_lines = paginator.page(1)
-        except EmptyPage:
-            # If page is out of range (e.g. 9999), deliver last page of results.
-            show_lines = paginator.page(paginator.num_pages)
-        context['num_prod'] = lista.count()
-        context['num_pages'] = paginator.num_pages
-        context["lines"] = show_lines
-        context['lista'] = paginator.get_page(page)
+        #productos-sub#
+        lista2 = Product.objects.filter(imagenes__preferred=True)
+        prod_page=get_object_or_404(Configuracion, variable='prod_page').get_valor_int()
+        paginator2 = Paginator(lista2, prod_page)
+        page2 = self.request.GET.get("page2")
+        context['num_prod'] = lista2.count()
+        context['num_pages2'] = paginator2.num_pages
+        context['lista2'] = paginator2.get_page(page2)
         return context
+
+class ProductView(TemplateView):
+    template_name = "shop/product.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(ProductView, self).get_context_data(**kwargs)
+        slug=kwargs['slug']
+        query = Product.objects.filter((Q(ref=slug)|Q(slug=slug)))#&Q(imagenes__preferred=True)
+        if query.count() == 1:
+            #product_ficha.html
+            context['ficha'] = query
+        else:
+            #product_grid.html
+            prod_page=get_object_or_404(Configuracion, variable='prod_page').get_valor_int()
+            paginator = Paginator(query, prod_page)
+            page = self.request.GET.get("page")
+            context['num_prod'] = query.count()
+            context['num_pages'] = paginator.num_pages
+            context['lista'] = paginator.get_page(page)
+        return context
+
+def product_borrar(request, ref):
+    n, resultado = Product.objects.filter(Q(ref=ref)|Q(slug=ref)).delete()
+    return { 'retorno': n, 'salida': 'borrado/s '+str(resultado)}
+
+def product_actualizar(request, breadcrumb, ref):
+    externo = get_object_or_404(Externo, name='Productos de DreamLove')
+    tree=ET.parse(externo.path())
+    root=tree.getroot()
+    product = Product.objects.filter(Q(ref=ref)|Q(slug=ref))
+    lista=[p.ref for p in product]
+    for prod in root.findall('product'):
+        ref = prod.find('public_id').text
+        if not ref in lista:
+            root.remove(prod)
+        #else: ET.dump(prod)
+   
+    if not root:
+        print('Producto Borrado '+ref)
+        product_borrar(request,ref)
+    else:
+        print('Producto Actualizado '+lista[0])
+        procesar_productos(root,True)
+        procesar_categorias(root)
+        procesar_fabricantes(root)
+        procesar_imagenes(root,True)
+    
+    #messages.info(self.request, "SALIDA: "+estado+' '+str(context['salida']))
+    return HttpResponseRedirect('/categorias/'+breadcrumb+'/'+ref)
 
 class SBAdminCategoryView(TemplateView):
     template_name = "sb-admin/categorias.html"
 
     def get_context_data(self, **kwargs):
-        cate_page = get_object_or_404(Configuracion, variable='cate_page').get_valor_int()
         context = super(SBAdminCategoryView, self).get_context_data(**kwargs)
+        parent = None
+        cate_page = get_object_or_404(Configuracion, variable='cate_page').get_valor_int()
         if 'slug' in kwargs:
-            parent=Category.objects.filter(slug=kwargs['slug'])[0] 
+            slug_split = kwargs['slug'].split('/')
+            cat_list = list(Category.objects.all())
+            slug_list = [ x.slug for x in cat_list ]
+            for slug in slug_split:
+                if slug in slug_list:
+                    parent = get_object_or_404(Category, slug=slug, parent=parent)
+            breadcrumbs_link = parent.get_cat_list('/')
+            name=parent.name
         else:
-            parent = None
+            breadcrumbs_link = ''
+            name='Categorías'
+        breadcumbs_name = [' '.join(i.split('/')[-1].split('-')) for i in breadcrumbs_link]
+        breadcrumbs = zip(breadcrumbs_link, breadcumbs_name)
         lista = Category.objects.filter(parent=parent)
         paginator = Paginator(lista, cate_page)
         page = self.request.GET.get("page")
-        try:
-            show_lines = paginator.page(page)
-        except PageNotAnInteger:
-            # If page is not an integer, deliver first page.
-            show_lines = paginator.page(1)
-        except EmptyPage:
-            # If page is out of range (e.g. 9999), deliver last page of results.
-            show_lines = paginator.page(paginator.num_pages)
-        context['num_cate'] = lista.count()
-        context['num_pages'] = paginator.num_pages
-        context["lines"] = show_lines
+        context['breadcrumbs'] = breadcrumbs
+        context['cat_name'] = name
         context['lista'] = paginator.get_page(page)
+        context['num_pages'] = paginator.num_pages
+        context['num_cate'] = lista.count()
+        #productos-sub#
+        prod_page=get_object_or_404(Configuracion, variable='prod_page').get_valor_int()
+        lista2 = Product.objects.filter(Q(category=parent)|Q(categories=parent)|Q(fabricante=parent)).distinct().filter(imagenes__preferred=True)
+        paginator2 = Paginator(lista2, prod_page)
+        page2 = self.request.GET.get("page2")
+        context['num_prod'] = lista2.count()
+        context['num_pages2'] = paginator2.num_pages
+        context['lista2'] = paginator2.get_page(page2)
         return context
 
 def catego_desactivar(request,pk):
     catego = get_object_or_404(Category, pk=pk)
     catego.desactivar()
     return HttpResponseRedirect('/sb-admin/categorias/')
-
-def procesar_productos(root,insertar=False):
-    if not root:
-        return { 'retorno': -1, 'salida': 'no root' }
-    limite = get_object_or_404(Configuracion, variable='product_limite').get_valor_int()
-    iva_21 = get_object_or_404(Configuracion, variable='iva').get_valor_dec()
-    n=0
-    nuevo=0
-    encontrado=0
-    actualizado=0
-    error=0
-    for prod in root.findall('product'):
-        if actualizado>limite:
-            break
-        ref = prod.find('public_id').text
-        updated = parse_datetime(prod.find('updated').text)
-        try:
-            p = Product.objects.get(ref=ref)
-            encontrado=encontrado+1
-        except ObjectDoesNotExist as e:
-            #Nuevo producto añadido                
-            p = Product(ref=ref,updated=datetime(1900, 1, 1, 0, 0))
-            nuevo=nuevo+1
-        if p.updated < updated or insertar:
-            try:
-                if prod.find('title').text:
-                    p.name = prod.find('title').text                
-                else:
-                    if prod.find('description').text:
-                        p.name = prod.find('description').text
-                    else:    
-                        if prod.find('internationalization/title/value').text:
-                            p.name = prod.find('internationalization/title/value').text
-                        else: 
-                            if prod.find('internationalization/description/value').text:
-                                p.name = prod.find('internationalization/description/value').text
-                            else: 
-                                p.name = p.ref
-                p.description = p.name
-                p.slug = slugify(p.name+' '+p.ref)
-                p.available = prod.find('available').text  
-                p.product_url = prod.find('product_url').text 
-
-                p.vat = Decimal(prod.find('vat').text)
-                iva=1+(p.vat/100)
-                p.cost_price = Decimal(prod.find('cost_price').text)
-                p.pvp=p.calculate_pvp()
-                aux = Decimal(prod.find('price').text)
-                p.price = aux*iva
-                aux = Decimal(prod.find('recommended_retail_price').text)
-                p.recommended_retail_price = aux*iva                       
-                aux = Decimal(prod.find('default_shipping_cost').text)
-                p.default_shipping_cost = Decimal(aux*(1+iva_21/100)).quantize(Decimal('.01'), rounding=ROUND_UP)+Decimal(0.50)
-
-                p.updated = updated       
-                p.html_description = prod.find('html_description').text
-                p.delivery_desc = prod.find('delivery_desc').text
-                
-                if prod.find('unit_of_measurement').text=='units':
-                    p.unit_of_measurement = 'unidad/es'
-                else:
-                    p.unit_of_measurement = prod.find('unit_of_measurement').text
-                p.release_date = prod.find('release_date').text
-                p.destocking = prod.find('destocking').text   
-                p.sale = prod.find('sale').attrib['value']
-                p.new = prod.find('new').attrib['value']
-                #<stock><location path="General">50</location></stock>
-                stock = prod.find('stock')
-                p.stock = stock.find('location').text
-                p.save() #created_date,               
-                actualizado=actualizado+1                 
-            except  IntegrityError as e:
-                print('INTEGRITYERROR REF: {0} PRICE: {1} ERROR: {2}'.format(p.ref,p.price,e)) 
-                #ET.dump(prod)
-                error=error+1  
-        n=n+1              
-    return {
-        'retorno': actualizado, 
-        'salida': 'Productos Procesados: '+str(n)
-            +'<br> Encontrados: '+str(encontrado)
-            +'<br> Nuevos: '+str(nuevo)
-            +'<br> Actualizados: '+str(actualizado)
-            +'<br> Errores: '+str(error)
-            +'<br> Total: '+str(encontrado+nuevo)
-        }
-
-class SBAdminExternoProcesarProductos(TemplateView):
-    template_name = "sb-admin/externo.html"
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        externo = get_object_or_404(Externo, pk=kwargs['pk'])
-        context['tamano'] = externo.file.size/1048576
-        tree = ET.parse(externo.path()) 
-        root = tree.getroot() 
-        salida = procesar_productos(root)
-        if salida['retorno']: estado = 'success'
-        else: estado = 'danger'
-        #messages.info(self.request, "SALIDA"+str(salida['retorno'])+' '+salida['salida'])
-        context['salida'] = {
-            'estado': estado,
-            'txto': 'Fichero PROCESADO con Éxito',
-            'detail': salida['salida'],
-            }
-        context['lista'] = Externo.objects.all()
-        return context
-
-def procesar_categorias(root):
-    if not root:
-        return { 'retorno': -1, 'salida': 'no root' }
-    limite = get_object_or_404(Configuracion,variable='categoria_limite').get_valor_int()
-    varios = get_object_or_404(Category, name='Varios', parent=None)
-    n=0
-    nuevo=0
-    encontrado=0
-    actualizado=0
-    error=0
-    for prod in root.findall('product'):   
-        if nuevo>limite:
-            break   
-        ref = prod.find('public_id').text
-        if prod.find('categories'):
-            try:
-                p = Product.objects.get(ref=ref)
-            except ObjectDoesNotExist as e:
-                error=error+1
-            for categoria in prod.find('categories'):                    
-                cat_jerarquia = categoria.text
-                parent=None
-                for cat_name in cat_jerarquia.split('|'):
-                    parent_ppal=parent
-                    if cat_name:
-                        try:
-                            cat = Category.objects.get(name=cat_name, parent=parent)
-                            encontrado=encontrado+1
-                        except ObjectDoesNotExist as e: 
-                            #Nuevo añadido                
-                            cat = Category(name=cat_name, slug=slugify(cat_name), parent=parent)
-                            cat.save()
-                            nuevo=nuevo+1                             
-                        parent = cat       
-                #name_ppal = categoria.attrib['ref'] 
-                if p:
-                    p.categories.add(cat)
-                    p.save()
-                else:
-                    error=error+1         
-                cat.gesioid = categoria.attrib['gesioid']
-                cat.save() 
-            if p:
-                p.category = cat
-                p.save()
-            else:
-                error=error+1 
-        n=n+1         
-    return {
-        'retorno': nuevo, 
-        'salida': 'Productos Procesados: '+str(n)
-            +'<br> Categorias Encontradas: '+str(encontrado)
-            +'<br> Nuevos: '+str(nuevo)
-            +'<br> Actualizadas: '+str(actualizado)
-            +'<br> Errores: '+str(error)
-            +'<br> Total: '+str(encontrado+nuevo)
-        }
-
-class SBAdminExternoProcesarCategorias(TemplateView):
-    template_name = "sb-admin/externo.html"
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        externo = get_object_or_404(Externo, pk=kwargs['pk'])
-        context['tamano'] = externo.file.size/1048576
-        tree = ET.parse(externo.path()) 
-        root = tree.getroot() 
-        salida = procesar_categorias(root)
-        if salida['retorno']: estado = 'success'
-        else: estado = 'danger'
-        #messages.info(self.request, "SALIDA"+str(salida['retorno'])+' '+salida['salida'])
-        context['salida'] = {
-            'estado': estado,
-            'txto': 'Fichero PROCESADO con Éxito',
-            'detail': salida['salida'],
-            }
-        context['lista'] = Externo.objects.all()
-        return context
-
-def cron(request):
-    run_cron = get_object_or_404(Configuracion, variable='run_cron')
-    if run_cron.activo:
-        ext = get_object_or_404(Externo, name='Productos de DreamLove')
-        tree=ET.parse(ext.path())
-        root=tree.getroot() 
-        if not procesar_productos(root).get('retorno'): 
-            if not procesar_categorias(root).get('retorno'): 
-                #if not procesar_imagenes(root).get('retorno'):  
-                    #if not procesar_imagenes(root).get('retorno'):  
-                ext.importar()
-                salida='importado'
-                    #else:
-                        #salida=-1
-                #else:
-                    #salida=-2
-            else:
-                salida='categorías'
-        else:
-            salida='productos'
-        #ext.n_productos = Product.objects.all().count()
-        #ext.n_fabricantes = Fabricante.objects.all().count()
-        #ext.n_imagenes = Imagen.objects.all().count()
-        #ext.n_categorias = Category.objects.all().count()
-        #ext.save()
-    else:
-        salida='inactivo'
-    return HttpResponse('ESTADO: '+salida)
 
 class SBAdminProductFichaView(FormView):
     template_name = "shop/form.html"
@@ -436,3 +478,4 @@ class SBAdminTablesView(TemplateView):
 
 class SBAdminFormsView(TemplateView):
     template_name = "sb-admin/forms.html"
+'''

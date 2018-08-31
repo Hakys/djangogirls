@@ -45,17 +45,18 @@ def populate():
     ]
     
     shop_configuracions = [
-        {"variable": "product_limite",  "valor": "300", "activo": True},
-        {"variable": "imagen_limite",   "valor": "400", "activo": True},
-        {"variable": "fabricante_limite", "valor": "300", "activo": True},
-        {"variable": "categoria_limite",  "valor": "300", "activo": True},
-        {"variable": "prod_page",       "valor": "24",  "activo": True},
-        {"variable": "cate_page",       "valor": "24",  "activo": True},
-        {"variable": "prod_home",       "valor": "24",  "activo": True},
-        {"variable": "run_cron",        "valor": "",    "activo": True},
-        {"variable": "beneficio",       "valor": "58",  "activo": True},
-        {"variable": "rec_equivalencia","valor": "52",  "activo": True},
-        {"variable": "iva",             "valor": "21",  "activo": True},
+        {"variable": "product_limite",      "valor": "300", "activo": True},
+        {"variable": "imagen_limite",       "valor": "400", "activo": True},
+        {"variable": "fabricante_limite",   "valor": "30", "activo": True},
+        {"variable": "categoria_limite",    "valor": "30", "activo": True},
+        {"variable": "result_page",         "valor": "10",  "activo": True},
+        {"variable": "prod_page",           "valor": "24",  "activo": True},
+        {"variable": "cate_page",           "valor": "24",  "activo": True},
+        {"variable": "prod_home",           "valor": "24",  "activo": True},
+        {"variable": "run_cron",            "valor": "",    "activo": False},
+        {"variable": "beneficio",           "valor": "58",  "activo": True},
+        {"variable": "rec_equivalencia",    "valor": "52",  "activo": True},
+        {"variable": "iva",                 "valor": "21",  "activo": True},
     ]
 
     shop_externo =[

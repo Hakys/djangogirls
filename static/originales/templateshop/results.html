@@ -1,0 +1,17 @@
+{% if fichas.count > 0 %}
+  {% for object in models %}
+    <div>
+      <h5>{{ object.ref }}</h5>
+      <p>{{ object.name }}</p>
+    </div>
+  {% endfor %}
+{% endif %}
+<!--
+    <li class="list-group-item text-right" >--><!--danger
+        <a class="list-group-item list-group-item-action text-right list-group-item-default"  style="min-height: 50px; padding-top:5px"
+        href="{% url 'product_detail' pk=ficha.product_id.pk %}" title="{{ ficha.title }}">
+        <img class="float-right" height="50px" src="{{ ficha.src }}" alt="{{ ficha.title }}" title="{{ ficha.title }}">
+        <p clas="col-xs-8">{{ ficha.title }}</p>
+    </a>
+</li>
+-->

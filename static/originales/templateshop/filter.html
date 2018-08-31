@@ -1,0 +1,12 @@
+<fieldset class="row">
+        <legend>Buscar</legend>
+        <form id="searchform" method="get" accept-charset="utf-8">
+            <input class="searchfield" id="searchbox" name="q" type="text" placeholder="Search">
+            <button class="searchbutton" type="submit"><i class="fa fa-search"></i></button>
+        </form>
+        <ul>
+            {% for pro in filter.qs %}
+                <li>{{ pro.ref }}-{{ pro.name }}</li>
+            {% endfor %}
+        </ul>
+      </fieldset>

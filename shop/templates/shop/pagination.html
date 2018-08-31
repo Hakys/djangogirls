@@ -1,25 +1,43 @@
-{% extends 'shop/base.html' %}
-
-{% load bootstrap4 %}
-
-{% block title %}
-    Pagination
-{% endblock %}
-
-{% block content %}
-
-    <table class="table">
-        {% for line in lines %}
-            <tr>
-                <td>{{ line }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-
-    <hr>
-
-    {% bootstrap_pagination lines url="/pagination?page=1&flop=flip" extra="q=foo" size="small" %}
-
-    {% bootstrap_pagination lines url="/pagination?page=1" size="large" %}
-
-{% endblock %}
+{% if product_set.paginator.num_pages > 1 %}
+    <nav class="">
+        <ul class="pagination">
+            {% if product_set.has_previous %}
+                <li class="page-item">
+                    <a class="page-link pl-1 pr-1" href="?page=1">
+                        <span aria-hidden="true">&laquo;&laquo;</span> 
+                        <span class="sr-only">Primera</span>
+                    </a>
+                </li>    
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link pl-1 pr-1">
+                        <span aria-hidden="true">&laquo;&laquo;</span> 
+                        <span class="sr-only">Primera</span>
+                    </span> 
+                </li>
+            {% endif %}
+                {% for i in p_range %}
+                    {% if product_set.number == i %}
+                        <li class="page-item active"><span class="page-link">{{ i }} <span class="page-link sr-only">(current)</span></span></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+            {% if product_set.has_next %}      
+                <li class="page-item">
+                    <a class="page-link pl-1 pr-1" href="?page={{ product_set.paginator.num_pages }}">
+                        <span class="sr-only">Ùltima</span>
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>   
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link pl-1 pr-1">
+                        <span class="sr-only">Ùltima</span>
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </span>
+                </li>  
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}

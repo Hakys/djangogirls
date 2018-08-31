@@ -1,0 +1,81 @@
+{% extends './base.html' %}
+
+{% load static %}
+
+{% block title %}SBAdmin - Ficheros Externos Proveedores{% endblock %}
+
+{% block content %}
+<div id="page-wrapper">
+    <div class="container-fluid">
+        <!-- Page Heading -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header"><i class="fa fa-cloud-download fa-fw"></i> Ficheros de Proveedores <small>Origen de Datos Externo</small></h1>
+                <ol class="breadcrumb">
+                    <li class="active">
+                        <i class="fa fa-cloud-download"></i> Ficheros de Proveedores
+                    </li>
+                </ol>
+            </div>
+            <!-- /.col-lg-12 --> 
+        </div>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-7">
+                <h2>Origenes de Datos
+                    <span class="pull-right">         
+                        {% if run_cron.activo %}
+                            <a href="{% url 'cron' %}" target="_blank" alt="Sincronizardor CRON" title="Tarea Programada de Actualización"
+                                class="text-success"><i class="fa fa-fw fa-retweet"></i></a>
+                        {% else %} <i title="Tarea Programada de Actualización Desabilitada" class="fa fa-fw fa-retweet text-danger"></i> {% endif %}
+                        <a href="/admin/shop/externo/add/" target="_blank"><i class="fa fa-fw fa-plus-circle"></i></a>
+                    </span>
+                </h2>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th>Proveedor</th>
+                                <th>URL</th>                                                                                
+                                <th>Fecha Actualización</th>
+                                <th colspan="2">Acciones</th>
+                            </tr>
+                        </thead>                                
+                        <tbody>
+                            {% for ficha in lista %}
+                                <tr>
+                                    <td><a href="/admin/shop/configuracion/{{ficha.pk}}/change/">{{ficha.name}}</a></td>
+                                    <td><a href="{{ficha.url}}" target="_blank">URL</a></td>                                            
+                                    <td>
+                                        <i class="fa fa-clock-o"></i>{{ficha.updated_date|date:"d/m/Y - H:i "}}
+                                        <a class="btn btn-default btn-xs" href="{% url 'externo_importar' pk=ficha.pk %}" alt="Importar">
+                                            <i class="fa fa-fw fa-download"></i>Descargar</a></td>
+                                    <td>
+                                        <div class="btn-group w-100 justify-content-center">
+                                        {% if ficha.pk is 2 %}
+                                            <a class="btn btn-primary btn-xs m-2" href="{% url 'procesar_productos' pk=ficha.pk %}"><i class="fa fa-fw fa-download"></i>Productos</a>
+                                            <a class="btn btn-primary btn-xs m-auto" href="{% url 'procesar_categorias' pk=ficha.pk %}"><i class="fa fa-fw fa-download"></i>Categorías</a>
+                                            <a class="btn btn-primary btn-xs" href="{% url 'procesar_fabricantes' pk=ficha.pk %}"><i class="fa fa-fw fa-download"></i>Fabricantes</a>
+                                            <a class="btn btn-primary btn-xs" href="{% url 'procesar_imagenes' pk=ficha.pk %}"><i class="fa fa-fw fa-download"></i>Imagenes</a>
+                                        {% endif %}
+                                    </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr><td colspan="9" class="text-center"><small>{{num_exte}} Fichero/s Externo/s</small></td></tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="col-lg-5">                        
+                {% include './model-resumen.html' %} 
+            </div>
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
+</div>
+<!-- /#page-wrapper -->
+{% endblock %}

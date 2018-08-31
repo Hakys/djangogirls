@@ -41,12 +41,14 @@
 
                 <div class="row">
                     <div class="col-lg-6">
-                        <h2>Origenes de Datos</h2>
+                        <h2>
+                            Mis Recursos Web
+                            <span class="pull-right"><a href="/admin/shop/myurls/add/" target="_blank"><i class="fa fa-fw fa-plus-circle"></i></a></span>
+                        </h2>
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover table-striped">
                                 <thead>
-                                    <tr>
-                                        <th></th>
+                                    <tr>                                        
                                         <th>Nombre</th>
                                         <th>Usuario</th>
                                         <th>Password</th>
@@ -56,11 +58,11 @@
                                 <tbody>
                                     {% for ficha in lista %}
                                         <tr>
-                                            <td>{{ficha.pk}}</td>
-                                            <td><a href="{{ficha.url}}" target="_blank">{{ficha.name}}</a></td>
+                                            
+                                            <td><a href="/admin/shop/myurls/{{ficha.pk}}/change/" target="_blank">{{ficha.name}}</a></td>
                                             <td>{{ficha.usuario}}</td>
                                             <td>{{ficha.password}}</td>                                                                                
-                                            <td><a href="{{ficha.url}}" target="_blank"><i class="fa fa-external-link"></i></a></td>
+                                            <td><a href="{{ficha.url}}" target="_blank">G<i class="fa fa-external-link"></i>!!</a></td>
                                         </tr>
                                     {% empty %}
                                         <tr class="danger"> 0 Direcciones </tr>

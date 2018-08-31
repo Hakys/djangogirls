@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pytz
 from datetime import datetime
 from decimal import *
@@ -13,7 +14,28 @@ from django.utils.text import slugify
 from urllib.error import URLError, HTTPError 
 from urllib.request import Request, urlopen
 
-fs = FileSystemStorage(location=settings.STATIC_ROOT+'\store')
+fs_store = FileSystemStorage(location=settings.STATIC_ROOT+'\store')
+fs_media = FileSystemStorage(location=settings.MEDIA_ROOT)  
+
+class Imagen(models.Model):
+    name = models.CharField(max_length=150, blank=False)
+    image = models.ImageField(storage=fs_media, null=True)
+    url = models.URLField(default='', max_length=100, unique=True, null=False)
+    preferred = models.BooleanField('Portada', default=False)
+    
+    def __str__(self):
+        if self.preferred: 
+            preferred='Sí' 
+        else: 
+            preferred='No'
+        return self.name+' ('+preferred+')'
+
+    def get_url(self):
+        #if self.url:
+           
+        #else:
+            #return self.media.url    
+        return self.url
 
 class Configuracion(models.Model):
     variable = models.CharField(default='', max_length=50, null=False, unique=True)
@@ -56,7 +78,7 @@ class Configuracion(models.Model):
 class Externo(models.Model): 
     name = models.CharField(default='', max_length=50)
     url = models.URLField(default='', max_length=100, unique=True)
-    file = models.FileField(storage=fs, null=True)
+    file = models.FileField(storage=fs_store, null=True)
     created_date = models.DateTimeField(default=timezone.now, verbose_name='Fecha de Creación')  
     updated_date = models.DateTimeField(default=datetime(1900, 1, 1, 0, 0), verbose_name='Última Actualización')
     
@@ -87,8 +109,8 @@ class Externo(models.Model):
 class MyURLs(models.Model): 
     name = models.CharField(default='', max_length=50)
     url = models.URLField(default='', max_length=180, unique=True)  
-    usuario = models.CharField(default='', max_length=128, null=True)
-    password = models.CharField(default='', max_length=128, null=True)  
+    usuario = models.CharField(default='', max_length=128, blank=True)
+    password = models.CharField(default='', max_length=128, blank=True)  
     
     class Meta:
         ordering = ('name','usuario')
@@ -114,14 +136,13 @@ class Category(models.Model):
     name = models.CharField(max_length = 150, null=False)
     slug = models.SlugField(max_length = 150, null=False)
     activo = models.BooleanField(default = True)
-    gesioid = models.IntegerField(unique = True, null = True) 
-    parent = models.ForeignKey('self', on_delete = models.SET_NULL, null = True, related_name = 'children')
+    gesioid = models.IntegerField(unique = True, null = True, blank=True) 
+    imagen = models.ForeignKey(Imagen, null=True, blank=True, on_delete=models.SET_NULL, related_name='portada')
+    parent = models.ForeignKey('self', on_delete = models.SET_NULL, null=True, blank=True, related_name = 'children')
      
     def __str__(self):  
-        if self.activo: 
-            activo='Si' 
-        else: 
-            activo='No'         
+        if self.activo: activo='Si' 
+        else: activo='No'         
         full_path = [self.name+' ('+activo+')']                  
         k = self.parent                          
         while k is not None:
@@ -130,16 +151,16 @@ class Category(models.Model):
         return ' >> '.join(full_path[::-1])   
         
     class Meta:
-        ordering = ('name',)
-        verbose_name_plural = 'Categorias'  
-        #unique_together = ('slug', 'parent',)
+        verbose_name_plural = 'categorias'  
+        unique_together = ('slug', 'parent',)
     
     def desactivar(self):
         self.activo = not self.activo
         self.save()
         return self.activo
 
-    def get_cat_list(self, separador):
+    def get_cat_list(self):
+        separador='/'
         k = self.parent
         breadcrumb = ['']
         while k is not None:
@@ -148,19 +169,21 @@ class Category(models.Model):
         for i in range(len(breadcrumb)-1):
             breadcrumb[i] = separador.join(breadcrumb[-1:i-1:-1])
         return breadcrumb[-1:0:-1]
-        
+
 class Product(models.Model): 
     slug = models.SlugField(max_length=150, unique=True, null=False)
     ref = models.CharField(max_length=50, null=False, unique=True)
-    name = models.CharField(max_length=150,  blank=False) 
+    name = models.CharField(max_length=150, blank=False) 
     description = models.TextField(null=True, blank=True)
     html_description = models.TextField(null=True, blank=True)		
     product_url = models.URLField(max_length=200, null=True, blank=True)
-
+    #<stock><location path="General">50</location></stock>
+    stock = models.IntegerField(default=0)
+    
     updated = models.DateTimeField('Última Actualización', default=timezone.now)
     created_date = models.DateTimeField(default=timezone.now)
     release_date = models.DateTimeField('Lanzamiento', blank=True, null=True)
-
+    
     available = models.BooleanField('Disponible', default=True)
     destocking = models.BooleanField('Liquidación', default=False)    
     sale = models.BooleanField('Rebajado', default=False)
@@ -175,13 +198,10 @@ class Product(models.Model):
     unit_of_measurement = models.CharField(max_length=20, default=0)
     pvp = models.DecimalField(max_digits=8, decimal_places=2, default=0)
 
-    #fabricante = models.ForeignKey(Fabricante, on_delete=models.SET_NULL, null=True, related_name='fabricante')
-
-    #<stock><location path="General">50</location></stock>
-    stock = models.IntegerField(default=0)
-
-    category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL, related_name='category_ppal')
+    category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL, related_name='category_ppal')
     categories = models.ManyToManyField(Category)
+    fabricante = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL, related_name='fabricante')
+    imagenes = models.ManyToManyField(Imagen)
 
     #prepaid_reservation = models.BooleanField('Pre-Pedido',default=False)
     #shipping_weight_grame = models.IntegerField(default=0)
@@ -229,18 +249,29 @@ class Product(models.Model):
         #self.published_date = timezone.now()
         self.available = True
         self.save()
-    '''
-    def get_fab_list(self, separador):
+    
+    def get_cat_list(self):
+        separador = '/'
+        k = self.category
+        breadcrumb = ["dummy"]
+        while k is not None:
+            breadcrumb.append(k.slug)
+            k = k.parent
+        for i in range(len(breadcrumb)-1):
+            breadcrumb[i] = separador.join(breadcrumb[-1:i-1:-1])
+        return breadcrumb[-1:0:-1]
+    
+    def get_fab_list(self):
+        separador = '/'
         k = self.fabricante
         breadcrumb = ["dummy"]
         while k is not None:
             breadcrumb.append(k.slug)
             k = k.parent
-
         for i in range(len(breadcrumb)-1):
             breadcrumb[i] = separador.join(breadcrumb[-1:i-1:-1])
-        return breadcrumb[-1:0:-1]    
-    '''
+        return breadcrumb[-1:0:-1]
+    
     def calculate_pvp(self):
         self.pvp=0
         beneficio = Configuracion.objects.get(variable='beneficio').get_valor_dec()

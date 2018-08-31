@@ -6,61 +6,56 @@
 {% block title %}Admin - Categorías{% endblock %}
 
 {% block content %}
-
         <div id="page-wrapper">
-
             <div class="container-fluid">
-
                 <!-- Page Heading -->
                 <div class="row">
-                    <div class="col-lg-12">
-                        <ol class="breadcrumb">
-                            <li class="active">
-                                <i class="fa fa-book" aria-hidden="true"></i> Categorías
-                            </li>
-                        </ol>
+                    <div class="col-lg-12">                            
+                        
                         <h1 class="page-header">
-                                Categorías <small> Clasificación de Productos por Características</small>
+                            Categorías <small> Clasificación de Productos por Características</small>
                         </h1>
+                        <ol class="breadcrumb">
+                                    <li class="breadcrumb-item">
+                                        <a href="{% url 'sbadmin_categorias' %}"><i class="fa fa-book" aria-hidden="true"></i> CATEGORÍAS</a>
+                                    </li>
+                                    {% if breadcrumbs %}
+                                        {% for slug,name in breadcrumbs %}
+                                            <li class="breadcrumb-item"><a href="{% url 'sbadmin_categorias' slug=slug %}">{{ name | upper }}</a></li>
+                                        {% endfor %}
+                                    {% endif %}        
+                                    <li class="breadcrumb-item active">
+                                        {{ cat_name | upper }}
+                                    </li>
+                                </ol>
                     </div>
                 </div>
                 <!-- /.row -->
 
                 <div class="row">
                     <div class="col-lg-6">
-                        <h2>Categorías</h2>
-                        {% if num_pages > 1 %}
-                            <div class="row align-content-center justify-content-center">
-                                {% bootstrap_pagination lines url="?page=1&flop=flip" extra="q=foo" size="medium" %} 
-                            </div>
-                        {% endif %}
+                        <h3>{{ cat_name | upper }}</h3>
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover table-striped">
+                            <table class="table table-hover table-striped">
                                 <thead>
                                     <tr>
-                                        <th></th>
-                                        <th>Nombre</th>
-                                        <th>Gesioid</th>
-                                        <th>Activo</th>
+                                        <th class="text-center">Subcategorías</th>
+                                        <th class="text-center">Visible</th>
                                         <th></th>
                                     </tr>
                                 </thead>                                
                                 <tbody>
                                     {% for ficha in lista %}
                                         <tr>
-                                            <td>{{ficha.pk}}</td>
                                             <td><a href="{{ficha.slug}}">{{ficha.name}}</a></td>
-                                            <td>{{ficha.gesioid}}</td>
-                                            {% if ficha.activo %}
-                                                <td class="success">
-                                                    <a href="{% url 'catego_desactivar' pk=ficha.pk %}"><i class="fa fa-check-square-o"></i></a>
-                                                </td>
-                                            {% else %}
-                                                <td class="danger">
-                                                    <a  href="{% url 'catego_desactivar' pk=ficha.pk %}"><i class="fa fa-square-o"></i></a>
-                                                </td>
-                                            {% endif %}                                                                                
-                                            <td>
+                                            <td  class="text-center">
+                                                {% if ficha.activo %}
+                                                    <a class="success" href="{% url 'catego_desactivar' pk=ficha.pk %}"><i class="fa fa-check-square-o"></i></a>
+                                                {% else %}
+                                                    <a class="danger" href="{% url 'catego_desactivar' pk=ficha.pk %}"><i class="fa fa-square-o"></i></a>
+                                                {% endif %}                   
+                                            </td>                                                             
+                                            <td class="text-center">
                                                 <a href="/admin/shop/category/{{ficha.pk}}/change/">Editar <i class="fa fa-edit"></i></a>
                                                 <a href="#" target="_blank">Vista Previa <i class="fa fa-eye"></i></a>
                                             </td>
@@ -71,70 +66,17 @@
                         </div>
                         <div class="row align-content-center justify-content-center">
                             {% if num_pages > 1 %}
-                                {% bootstrap_pagination lines url="?page=1&flop=flip" extra="q=foo" size="medium" %}
+                                {% bootstrap_pagination lista url="?page=1&page2=1&flop=flip" extra="q=foo" size="medium" %}
                             {% endif %}
-                            {{num_cate}} Categorías/s
+                        </div>
+                        <div class="row align-content-center justify-content-center">
+                            <small>{{num_cate}} Categoría/s</small>
                         </div>
                     </div>
                     <hr>
-                    <div class="col-lg-6">                        
-                        <h2>Contextual Classes</h2>
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Page</th>
-                                        <th>Visits</th>
-                                        <th>% New Visits</th>
-                                        <th>Revenue</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="active">
-                                        <td>/index.html</td>
-                                        <td>1265</td>
-                                        <td>32.3%</td>
-                                        <td>$321.33</td>
-                                    </tr>
-                                    <tr class="success">
-                                        <td>/about.html</td>
-                                        <td>261</td>
-                                        <td>33.3%</td>
-                                        <td>$234.12</td>
-                                    </tr>
-                                    <tr class="warning">
-                                        <td>/sales.html</td>
-                                        <td>665</td>
-                                        <td>21.3%</td>
-                                        <td>$16.34</td>
-                                    </tr>
-                                    <tr class="danger">
-                                        <td>/blog.html</td>
-                                        <td>9516</td>
-                                        <td>89.3%</td>
-                                        <td>$1644.43</td>
-                                    </tr>
-                                    <tr>
-                                        <td>/404.html</td>
-                                        <td>23</td>
-                                        <td>34.3%</td>
-                                        <td>$23.52</td>
-                                    </tr>
-                                    <tr>
-                                        <td>/services.html</td>
-                                        <td>421</td>
-                                        <td>60.3%</td>
-                                        <td>$724.32</td>
-                                    </tr>
-                                    <tr>
-                                        <td>/blog/post.html</td>
-                                        <td>1233</td>
-                                        <td>93.2%</td>
-                                        <td>$126.34</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="col-lg-6">    
+                        {% include 'sb-admin/productos-sub.html' %}                    
+                        {% include 'sb-admin/categorias-resumen.html' %}                    
                     </div>
                 </div>
                 <!-- /.row -->

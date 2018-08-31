@@ -28,48 +28,8 @@
 
                 <div class="row">
                     <div class="col-lg-6">
-                        <h2>Productos</h2>
-                        {% if num_pages > 1 %}
-                            <div class="row align-content-center justify-content-center">
-                                {% bootstrap_pagination lines url="?page=1&flop=flip" extra="q=foo" size="medium" %} 
-                            </div>
-                        {% endif %}
-                        <div class="table-responsive">                            
-                            <table class="table table-bordered table-hover table-striped">
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>Nombre</th>
-                                        <th>Referencia</th>
-                                        <th>Coste</th>
-                                        <th>Recomendado</th>
-                                        <th>PVP</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>                                
-                                <tbody>
-                                    {% for ficha in lista %}
-                                        <tr>
-                                            <td>{{ficha.pk}}</td>
-                                            <td><a href="/admin/shop/product/{{ficha.pk}}/change/">{{ficha.name}}</a></td>
-                                            <td>{{ficha.ref}}</td>
-                                            <td>{{ficha.cost_price}}</td>                                                                                
-                                            <td>{{ficha.price}}</td>                                                                                
-                                            <td>{{ficha.pvp}}</td>                                                                                
-                                            <td>
-                                                <a href="{{ficha.product_url}}" target="_blank"><i class="fa fa-external-link"></i></a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>                            
-                        </div>
-                        <div class="row align-content-center justify-content-center">
-                            {% if num_pages > 1 %}
-                                {% bootstrap_pagination lines url="?page=1&flop=flip" extra="q=foo" size="medium" %}
-                            {% endif %}
-                            {{num_prod}} Producto/s
-                        </div>
+                            {% include 'shop/filter.html' %}
+                            {% include 'sb-admin/productos-sub.html' %}    
                     </div>
                     <hr>
                     <div class="col-lg-6">                        

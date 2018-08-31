@@ -1,0 +1,110 @@
+{% extends './bootstrap.html' %}
+{% load static %}
+{% load bootstrap4 %}
+{% block title %}{{ block.super }}{% endblock %}
+
+{% block bootstrap4_extra_head %}
+    {{ block.super }}
+    <!-- Custom styles for this template -->
+    <link href="{% static 'shop/css/shop-homepage.css' %}" rel="stylesheet">
+    <link href="{% static 'shop/css/uikit.css' %}" rel="stylesheet">
+    <link href="{% static 'shop/css/responsive.css' %}" rel="stylesheet">
+    <link href="{% static 'shop/css/bootstrap-custom.css' %}" rel="stylesheet">
+
+    <!-- Bootstrap Core CSS -->
+    <link href="{% static 'shop/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+
+    <!-- Social Buttons CSS -->                                     
+    <link href="{% static 'shop/vendor/bootstrap-social/bootstrap-social.css' %}" rel="stylesheet">
+
+    <!-- MetisMenu CSS -->
+    <link href="{% static 'shop/vendor/metisMenu/metisMenu.min.css' %}" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    <link href="{% static 'shop/vendor/morrisjs/morris.css' %}" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="{% static 'shop/vendor/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
+
+    <link href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" media="all"/> 
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+{% endblock %}
+   
+{% block bootstrap4_content %}
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">Start Bootstrap</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home
+                    <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'productos' %}">Productos</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Services</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>  
+                <li class="nav-item"></li> 
+                <!--<li class="nav-item"><a class="nav-link" href="{% url 'sbadmin_home' %}">SB-Admin</a></li>-->
+                <li class="nav-item"><a class="nav-link" href="{% url 'sbadmin_home' %}">SBAdmin</a></li>
+                <li class="nav-item"> include './search.html' </li>
+                <!--ic-trigger-on="mouseenter"-->
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Page Content -->
+    <div class="container" id="search-result-container">
+
+        {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+        <!-- include "./modal.html" -->
+        {% block content %}(no content){% endblock %}
+
+    </div>
+    <!-- /.container -->
+    
+{% endblock %}
+
+{% block bootstrap4_after_content %}
+    {{ block.super }}
+     <!-- Footer -->
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">This is <em>bootstrap4</em> for <strong>Django</strong>.</p>    
+            <p class="m-0 text-center text-white">Copyright &copy; Catálogo Diabla Roja 2018</p>
+        </div>
+        <!-- /.container -->
+    </footer>
+{% endblock %}  
+
+{% block bootstrap4_extra_script %}
+    {{ block.super }}
+    <!-- JavaScript -->
+    <script src="{% static 'shop/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <!-- jQuery -->
+    <script src="{% static 'shop/vendor/jquery/XXXjquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{% static 'shop/vendor/bootstrap/js/bootstrap.min.js"></script>
+ 
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="{% static 'shop/vendor/metisMenu/metisMenu.min.js"></script> 
+
+    <script src="{% static 'shop/js/script.js' %}"></script>
+    <script src="{% static 'shop/js/ajax.js' %}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="https://intercoolerreleases-leaddynocom.netdna-ssl.com/intercooler-1.1.1.min.js"></script>
+{% endblock %}
