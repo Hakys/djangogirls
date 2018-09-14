@@ -1,0 +1,19 @@
+{% load static %}
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">
+        <a href="{% url 'listing-grid' %}">CATEGORíAS</a></li>
+    {% if breadcrumbs %}
+        {% for slug,name in breadcrumbs %}
+            <li class="breadcrumb-item"><a href="/categorias/{{slug}}">{{ name | upper }}</a></li>
+        {% endfor %}
+    {% endif %}        
+    <li class="breadcrumb-item active" aria-current="page">
+        <!--
+        {% if ficha.image.url %}
+            <img src="{{ ficha.image.url }}" width="45px" height="45px">
+        {% else %}
+            <img src="{% static 'img/no-foto.jpg' %}" alt="Sin Foto" width="45px" height="45px">
+        {% endif %}-->
+            {{search | upper }}
+    </li>
+</ol>

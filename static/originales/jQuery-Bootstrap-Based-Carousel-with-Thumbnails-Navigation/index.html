@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bootstrap Based Carousel with Thumbnails Navigation</title>
+<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+<style>
+.slider-navigation {
+  background: aquamarine;
+  padding: 30px 15px;
+  text-align: center;
+}
+
+#slider-thumbs { margin-top: -100px; }
+
+#slider-thumbs .list-inline li {
+  width: 25%;
+  padding: 0px;
+  margin-right: -4px;
+  cursor: pointer;
+}
+
+#slider-thumbs .list-inline li:first-child { padding-left: 5px; }
+
+.slider-nav-arrow {
+  text-align: center;
+  margin-bottom: 0px;
+  visibility: hidden;
+}
+
+.selected .slider-nav-arrow { visibility: visible; }
+
+.selected .slider-navigation { opacity: 0.5; }
+</style><link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+</head>
+
+<body><div id="jquery-script-menu">
+<div class="jquery-script-center">
+<ul>
+<li><a href="http://www.jqueryscript.net/slider/jQuery-Bootstrap-Based-Carousel-with-Thumbnails-Navigation.html">Download This Plugin</a></li>
+<li><a href="http://www.jqueryscript.net/">Back To jQueryScript.Net</a></li>
+</ul>
+<div class="jquery-script-ads"><script type="text/javascript"><!--
+google_ad_client = "ca-pub-2783044520727903";
+/* jQuery_demo */
+google_ad_slot = "2780937993";
+google_ad_width = 728;
+google_ad_height = 90;
+//-->
+</script>
+<script type="text/javascript"
+src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script></div>
+<div class="jquery-script-clear"></div>
+</div>
+</div>
+<div class="container" style="margin-top:150px;">
+  <h1>Bootstrap Based Carousel with Thumbnails Navigation</h1>
+  
+  <!-- main slider carousel -->
+  <div class="row">
+    <div class="col-md-12" id="slider">
+      <div class="col-md-12" id="carousel-bounding-box">
+        <div id="myCarousel" class="carousel slide"> 
+          <!-- main slider carousel items -->
+          <div class="carousel-inner">
+            <div class="active item" data-slide-number="1"> <img src="https://unsplash.it/1200/600?image=365" class="img-responsive"> </div>
+            <div class="item" data-slide-number="2"> <img src="https://unsplash.it/1200/600?image=361" class="img-responsive"> </div>
+            <div class="item" data-slide-number="3"> <img src="https://unsplash.it/1200/600?image=366" class="img-responsive"> </div>
+            <div class="item" data-slide-number="4"> <img src="https://unsplash.it/1200/600?image=367" class="img-responsive"> </div>
+          </div>
+          <!-- main slider carousel nav controls --> <a class="carousel-control left" href="#myCarousel" data-slide="prev">‹</a> <a class="carousel-control right" href="#myCarousel" data-slide="next">›</a> </div>
+      </div>
+    </div>
+  </div>
+  <!--/main slider carousel--> 
+  <!-- thumb navigation carousel -->
+  <div class="col-md-12 hidden-sm hidden-xs" id="slider-thumbs"> 
+    <!-- thumb navigation carousel items -->
+    <ul class="list-inline">
+      <li> <a id="carousel-selector-1" class="selected">
+        <div class="slider-navigation"> Some text<br>
+          Some text here </div>
+        </a></li>
+      <li> <a id="carousel-selector-2">
+        <div class="slider-navigation" style="background: darksalmon;"> Some text<br>
+          Some text here </div>
+        </a></li>
+      <li> <a id="carousel-selector-3">
+        <div class="slider-navigation" style="background: bisque;"> Some text<br>
+          Some text here </div>
+        </a></li>
+      <li> <a id="carousel-selector-4">
+        <div class="slider-navigation" style="background: burlywood;"> Some text<br>
+          Some text here </div>
+        </a></li>
+    </ul>
+  </div>
+</div>
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script> 
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script> 
+<script>
+	$('#myCarousel').carousel({
+	  interval: 3000
+	});
+
+	// handles the carousel thumbnails
+	$('[id^=carousel-selector-]').hover(function() {
+	  var id_selector = $(this).attr("id");
+	  //console.log(id_selector);
+	  var id = id_selector.substr(id_selector.length - 1);
+	  //console.log(id);
+	  id = parseInt(id);
+	  $('#myCarousel').carousel(id - 1);
+	  $('[id^=carousel-selector-]').removeClass('selected');
+	  $(this).addClass('selected');
+	  //console.log(this);
+	});
+
+	// when the carousel slides, auto update
+	$('#myCarousel').on('slid.bs.carousel', function(e) {
+	  var id = $('.item.active').data('slide-number');
+	  id = parseInt(id);
+	  $('[id^=carousel-selector-]').removeClass('selected');
+	  $('[id=carousel-selector-' + id + ']').addClass('selected');
+	});
+</script>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-36251023-1']);
+  _gaq.push(['_setDomainName', 'jqueryscript.net']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</body>
+</html>

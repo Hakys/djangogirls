@@ -32,8 +32,8 @@
             <div class="tab-content">
                 {% for image in ficha.imagenes.all %}
                     <div id="{{ image.pk }}" class="container tab-pane {% if image.preferred %}active{% else %}fade{% endif %}">
-                        <img class="replace-2x img-responsive" src="{{ image.url }}" alt="{{ image.name }}"
-                            title="{{ image.name }}" width="100%">
+                        <img class="replace-2x img-responsive" src="{{ image.url }}" 
+                            alt="{{ image.name }}" title="{{ image.name }}" width="100%">
                     </div>
                 {% endfor %}
             </div>
@@ -162,7 +162,7 @@
                 <div class="row">           
                     <div class="btn-group" role="group">                                            
                         {% if ficha.new %}
-                            <div class="alert alert-success py-1 m-0 mr-2" role="alert" >Nuevo</div>{% endif %}
+                            <span class="alert alert-success py-1 m-0 mr-2" role="alert" >Nuevo</span>{% endif %}
                         {% if ficha.release_date >= hoy %}
                             {% if ficha.new %}
                                 <div class="alert alert-primary py-1 m-0 mr-2" role="alert">Lanzamiento {{ ficha.release_date|date:"d/m/Y" }}</div>
@@ -207,6 +207,7 @@
                         <div class="filter-content collapse" id="collapse33" style="">
                             <div class="card-body">
                                 <dl class="row">
+                                    <dt class="col-sm-8 text-right">stock</dt><dd class="col-sm-auto">{{ ficha.stock }}</dd>
                                     <dt class="col-sm-8 text-right">F. Creación:</dt><dd class="col-sm-auto">{{ ficha.created_date|date:"d/m/Y" }}</dd>
                                     <dt class="col-sm-8 text-right">F. Actualización:</dt><dd class="col-sm-auto">{{ ficha.updated|date:"d/m/Y, H:i" }}</dd>
                                     <dt class="col-sm-8 text-right">F. Lanzamiento/Reposición:</dt><dd class="col-sm-auto">{{ ficha.release_date|date:"d/m/Y" }}</dd>
@@ -236,7 +237,6 @@
                                     <dt class="col-sm-6 text-right">destocking</dt><dd class="col-sm-auto">{{ ficha.destocking }}</dd>
                                     <dt class="col-sm-6 text-right">sale</dt><dd class="col-sm-auto">{{ ficha.sale }}</dd>
                                     <dt class="col-sm-6 text-right">new</dt><dd class="col-sm-auto">{{ ficha.new }}</dd>
-                                    <dt class="col-sm-6 text-right">stock</dt><dd class="col-sm-auto">{{ ficha.stock }}</dd>
                                 </dl>
                             </div> <!-- card-body.// -->
                         </div>

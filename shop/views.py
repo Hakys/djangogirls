@@ -15,7 +15,7 @@ from django.db.models import Q
 from django.db.models.fields.files import FieldFile
 from django.http import *
 from django.shortcuts import render, get_object_or_404, redirect, render_to_response
-from django.urls import reverse
+from django.urls import *
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.views import View
@@ -97,14 +97,17 @@ def categorias(request, jerarquia, salida=[]):
         if slug in all_slugs:
             parent = get_object_or_404(Category,slug=slug,parent=parent)
         else:
+            instance = get_object_or_404(Product,Q(ref=slug)|Q(slug=slug))
+            '''
             instance = get_object_or_404(Product, slug=slug)
             breadcrumbs_link = instance.get_cat_list()
             category_name = [' '.join(i.split('/')[-1].split('-')) for i in breadcrumbs_link]
             breadcrumbs = zip(breadcrumbs_link, category_name)
+            '''
             return product_detail(request, instance.slug, salida)
             #return render(request, "postDetail.html", {'instance':instance,'breadcrumbs':breadcrumbs})
     
-    #filter-row.html#
+    #filter-row.html - breadcrumb.html#
     breadcrumbs_link = parent.get_cat_list()
     category_name = [' '.join(i.split('/')[-1].split('-')) for i in breadcrumbs_link]
     breadcrumbs = zip(breadcrumbs_link, category_name)
@@ -136,24 +139,27 @@ def categorias(request, jerarquia, salida=[]):
         'p_range': range(p_ini,p_fin+1),
     })
 
-class ProductDetailView(TemplateView):
-    template_name = "shop/product-detail.html"
-
-class ListingGridView(TemplateView):
-    template_name = "shop/listing-grid.html"
-
 def product_detail(request, slug, salida=[]):
     try:
         product = Product.objects.get(Q(ref=slug)|Q(slug=slug))
     except:
         salida.append({'retorno': -1, 'salida': "Producto No Encontrado" })
-        return redirect('/productos/')    
-        return productos(request, salida)
+        #return todas_categorias(request,salida)
+        return redirect(todas_categorias)    
+        #return productos(request, salida)
+
+    #breadcrumb.html#
     breadcrumbs_link = product.get_cat_list()
-    fabricante_name = [' '.join(i.split('/')[-1].split('-')) for i in breadcrumbs_link]
-    breadcrumbs = zip(breadcrumbs_link, fabricante_name)
-    #pvp=product.get_pvp()
+    category_name = [' '.join(i.split('/')[-1].split('-')) for i in breadcrumbs_link]
+    breadcrumbs = zip(breadcrumbs_link, category_name)
     
+    #breadcrumb-fab.html#
+    breadcrumbs_link_fab = product.get_fab_list()
+    fabricante_name = [' '.join(i.split('/')[-1].split('-')) for i in breadcrumbs_link_fab]
+    breadcrumbs_fab = zip(breadcrumbs_link_fab, fabricante_name)
+
+
+    #pvp=product.get_pvp()
     iva=Decimal(product.vat/100)
     beneficio = Configuracion.objects.get(variable='beneficio').get_valor_dec()
     rec_equivalencia = Configuracion.objects.get(variable='rec_equivalencia').get_valor_dec()
@@ -172,12 +178,48 @@ def product_detail(request, slug, salida=[]):
         'date_min': datetime(1900, 1, 1, 0, 0),
         'ficha': product, 
         'breadcrumbs':breadcrumbs,
+        'breadcrumbs_fab':breadcrumbs_fab,
         'salida':salida,
     })
 
+def product_borrar(request, jerarquia, slug):
+    instance = get_object_or_404(Product,Q(ref=slug)|Q(slug=slug))
+    n,r=instance.delete()
+    print(n,r)
+    return HttpResponseRedirect('/categorias/'+jerarquia+'/')  
 
+def product_actualizar(request, jerarquia, slug):
+    externo = get_object_or_404(Externo, name='Productos de DreamLove')
+    tree=ET.parse(externo.path())
+    root=tree.getroot()
+    product = Product.objects.filter(Q(ref=slug)|Q(slug=slug))
+    lista=[p.ref for p in product]
+    for prod in root.findall('product'):
+        ref = prod.find('public_id').text
+        if not ref in lista:
+            root.remove(prod)
+        #else: ET.dump(prod)
+    if not root:
+        print('Producto Borrado '+slug)
+        product_borrar(request, jerarquia, slug)
+    else:
+        print('Producto Actualizado '+lista[0])
+        procesar_productos(root,True)
+        procesar_categorias(root)
+        procesar_fabricantes(root)
+        procesar_imagenes(root,True)
+    
+    #messages.info(self.request, "SALIDA: "+estado+' '+str(context['salida']))
+    return HttpResponseRedirect('/categorias/'+jerarquia+'/'+slug)
 
 '''
+class ProductDetailView(TemplateView):
+    template_name = "shop/product-detail.html"
+
+class ListingGridView(TemplateView):
+    template_name = "shop/listing-grid.html"
+
+
 class ProductListView(TemplateView):
     template_name = "shop/product_grid.html"
 

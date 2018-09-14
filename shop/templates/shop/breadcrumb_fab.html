@@ -1,0 +1,20 @@
+{% load static %}
+<ol class="breadcrumb">
+    <!--
+    <li class="breadcrumb-item">
+        <a href="{% url 'product-listado' jerarquia='marcas' %}">Todas las Marcas</a></li>-->
+    {% if breadcrumbs_fab %}
+        {% for slug,name in breadcrumbs_fab %}
+            <li class="breadcrumb-item"><a href="/categorias/{{slug}}">{{ name | upper }}</a></li>
+        {% endfor %}
+    {% endif %}        
+    <li class="breadcrumb-item active" aria-current="page">
+        <!--
+        {% if ficha.image.url %}
+            <img src="{{ ficha.image.url }}" width="45px" height="45px">
+        {% else %}
+            <img src="{% static 'img/no-foto.jpg' %}" alt="Sin Foto" width="45px" height="45px">
+        {% endif %}-->
+            {{ ficha.fabicante.name | upper }}
+    </li>
+</ol>
